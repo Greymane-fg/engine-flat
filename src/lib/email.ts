@@ -47,12 +47,36 @@ export type EmailConfig = {
 
 const env = import.meta.env;
 
+/**
+ * Shipped defaults for this deployment.
+ *
+ * Only the PUBLIC key belongs here — it is designed to be visible in the
+ * browser bundle. Never place a private key or SMTP credential in this file or
+ * in any `VITE_` variable: everything prefixed `VITE_` is compiled into public
+ * JavaScript.
+ *
+ * Any `.env` value overrides the corresponding default, so the credentials can
+ * be rotated without touching code.
+ */
+const DEFAULTS = {
+  serviceId: 'service_engine',
+  publicKey: 'QW0apJtjNMp6E4PP9',
+  /** To YOU — internal notification. */
+  adminTemplateId: 'template_2awtneq',
+  /** To THE MERCHANT — confirmation. */
+  userTemplateId: 'template_mrb3g7f',
+} as const;
+
+const pick = (envValue: unknown, fallback: string): string =>
+  typeof envValue === 'string' && envValue.trim() ? envValue.trim() : fallback;
+
 export const EMAIL_CONFIG: EmailConfig = {
-  serviceId: (env.VITE_EMAILJS_SERVICE_ID as string) ?? '',
-  publicKey: (env.VITE_EMAILJS_PUBLIC_KEY as string) ?? '',
-  adminTemplateId: (env.VITE_EMAILJS_ADMIN_TEMPLATE_ID as string) ?? '',
-  userTemplateId: (env.VITE_EMAILJS_USER_TEMPLATE_ID as string) ?? '',
-  adminEmail: (env.VITE_EMAILJS_ADMIN_EMAIL as string) ?? SITE.email,
+  serviceId: pick(env.VITE_EMAILJS_SERVICE_ID, DEFAULTS.serviceId),
+  publicKey: pick(env.VITE_EMAILJS_PUBLIC_KEY, DEFAULTS.publicKey),
+  // Keep the admin/merchant mapping explicit: these two are easy to swap.
+  adminTemplateId: pick(env.VITE_EMAILJS_ADMIN_TEMPLATE_ID, DEFAULTS.adminTemplateId),
+  userTemplateId: pick(env.VITE_EMAILJS_USER_TEMPLATE_ID, DEFAULTS.userTemplateId),
+  adminEmail: pick(env.VITE_EMAILJS_ADMIN_EMAIL, SITE.email),
 };
 
 /** True when both templates and the service are wired up. */
@@ -323,6 +347,8 @@ export async function sendApplicationEmails(
 export type EmailDiagnostics = {
   configured: boolean;
   missing: string[];
+  /** Non-fatal problems worth showing in the console. */
+  warnings: string[];
   serviceId: string;
   adminTemplateId: string;
   userTemplateId: string;
@@ -335,9 +361,22 @@ export function emailDiagnostics(config: EmailConfig = EMAIL_CONFIG): EmailDiagn
   if (!config.publicKey) missing.push('VITE_EMAILJS_PUBLIC_KEY');
   if (!config.adminTemplateId) missing.push('VITE_EMAILJS_ADMIN_TEMPLATE_ID');
   if (!config.userTemplateId) missing.push('VITE_EMAILJS_USER_TEMPLATE_ID');
+  const warnings: string[] = [];
+  if (
+    config.adminTemplateId &&
+    config.userTemplateId &&
+    config.adminTemplateId === config.userTemplateId
+  ) {
+    // Both sides would receive the same rendering, addressed to the same person.
+    warnings.push(
+      'Both template IDs are identical — the merchant and the team would receive the same email.',
+    );
+  }
+
   return {
     configured: missing.length === 0,
     missing,
+    warnings,
     serviceId: config.serviceId,
     adminTemplateId: config.adminTemplateId,
     userTemplateId: config.userTemplateId,
