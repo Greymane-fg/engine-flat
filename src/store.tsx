@@ -18,6 +18,7 @@ import type {
 } from './types';
 import { APPLICATION_STAGES } from './config';
 import { uid } from './lib/utils';
+import type { DeliveryState } from './lib/email';
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -35,6 +36,8 @@ export type ApplicationContact = {
   requirements?: string;
   notes?: string;
   attachments: AttachmentMeta[];
+  /** Merchant accepted the assessment/service disclaimer. */
+  consentGiven?: boolean;
 };
 
 export type Application = {
@@ -54,6 +57,8 @@ export type Application = {
   expert?: string;
   internalNote?: string;
   paid?: boolean;
+  /** Outcome of the two EmailJS sends recorded at submission time. */
+  delivery?: DeliveryState;
 };
 
 export type AdminSettings = {

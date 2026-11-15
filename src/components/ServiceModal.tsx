@@ -6,6 +6,7 @@ import {
   Check,
   Clock,
   FileText,
+  Mail,
   Minus,
   Paperclip,
   Sparkles,
@@ -14,8 +15,10 @@ import {
 import { Modal } from './Modal';
 import { Field, SelectField, TextAreaField } from './ui';
 import { useApp, makeApplication } from '../store';
-import { money, currencyCode } from '../lib/utils';
+import { sendApplicationEmails, summariseDelivery, type DeliveryState, EMPTY_DELIVERY } from '../lib/email';
+import { money, currencyCode, whatsappLink } from '../lib/utils';
 import { BUSINESS_CATEGORIES } from '../lib/assess';
+import { SITE } from '../config';
 import type { PackageTier, Service, ServiceId } from '../types';
 
 type Step = 'compare' | 'apply' | 'review' | 'done';
@@ -71,6 +74,8 @@ export function ServiceModal({
   const [files, setFiles] = useState<File[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [reference, setReference] = useState<string | null>(null);
+  const [delivery, setDelivery] = useState<DeliveryState>(EMPTY_DELIVERY);
+  const [sending, setSending] = useState(false);
 
   if (!service) return null;
   const pkg = service.packages.find((p) => p.id === selectedId) ?? service.packages[0];
@@ -101,8 +106,8 @@ export function ServiceModal({
 
   const { addApplication, notify, applications } = useApp();
 
-  function submit() {
-    if (!validate()) return;
+  async function submit() {
+    if (!validate() || sending) return;
     const app = makeApplication({
       type: 'service',
       serviceId: service!.id,
@@ -120,11 +125,26 @@ export function ServiceModal({
         requirements: values.requirements,
         notes: values.notes,
         attachments: files.map((f) => ({ name: f.name, size: f.size, type: f.type })),
+        consentGiven: true,
       },
     }, applications);
-    addApplication(app);
+
+    // Route to the team inbox and to the merchant before confirming anything.
+    setSending(true);
+    const outcome = await sendApplicationEmails(app);
+    setSending(false);
+
+    const delivered = { ...app, delivery: outcome };
+    addApplication(delivered);
     setReference(app.reference);
-    notify('Application submitted. A specialist will review it shortly.');
+    setDelivery(outcome);
+
+    const summary = summariseDelivery(outcome);
+    notify(
+      summary.tone === 'success'
+        ? 'Application submitted — a specialist will review it shortly.'
+        : 'Application saved. See the confirmation screen for delivery details.',
+    );
     setStep('done');
   }
 
@@ -518,9 +538,13 @@ export function ServiceModal({
                     </li>
                   </ul>
 
-                  <button className="btn btn--primary btn--block" onClick={submit}>
-                    Submit Application
-                    <ArrowRight size={15} className="arrow" />
+                  <button
+                    className="btn btn--primary btn--block"
+                    onClick={() => void submit()}
+                    disabled={sending}
+                  >
+                    {sending ? 'Submitting…' : 'Submit Application'}
+                    {!sending && <ArrowRight size={15} className="arrow" />}
                   </button>
                   <p className="summary-card__fine">
                     Applications are reviewed before any payment is taken. A specialist
@@ -618,9 +642,9 @@ export function ServiceModal({
               <ArrowLeft size={14} />
               Edit details
             </button>
-            <button className="btn btn--primary" onClick={submit}>
-              Submit Application
-              <ArrowRight size={15} className="arrow" />
+            <button className="btn btn--primary" onClick={() => void submit()} disabled={sending}>
+              {sending ? 'Submitting…' : 'Submit Application'}
+              {!sending && <ArrowRight size={15} className="arrow" />}
             </button>
           </div>
         </>
@@ -629,15 +653,37 @@ export function ServiceModal({
       {step === 'done' && (
         <div className="modal__body">
           <div className="success">
-            <div className="success__mark">
+            <div className={`success__mark ${delivery.failed.some((f) => f.channel === 'admin') ? 'success__mark--warn' : ''}`}>
               <Check size={30} strokeWidth={3} />
             </div>
-            <h2 className="h1-lg">Your Request Has Been Received!</h2>
+            <h2 className="h1-lg">{summariseDelivery(delivery).title}</h2>
             <p className="modal__sub" style={{ textAlign: 'center' }}>
-              Thank you for choosing us. Your submission has been sent to our team for
-              review. An appropriate specialist will review your requirements and contact
-              you using the details provided.
+              {summariseDelivery(delivery).message}
             </p>
+
+            {delivery.failed.length > 0 && (
+              <div className="delivery-note delivery-note--warn">
+                <AlertTriangle size={14} />
+                <span>
+                  Delivery issue: {delivery.failed.map((f) => f.reason).join('; ')}. You can
+                  still reach us on{' '}
+                  <a href={whatsappLink(`Application ${reference ?? ''}`)} target="_blank" rel="noreferrer noopener">
+                    WhatsApp
+                  </a>{' '}
+                  or at {SITE.email}.
+                </span>
+              </div>
+            )}
+
+            {delivery.sent.includes('user') && (
+              <div className="delivery-note">
+                <Mail size={14} />
+                <span>
+                  A confirmation has been sent to <strong>{values.email}</strong>. Check
+                  spam if it does not arrive within a few minutes.
+                </span>
+              </div>
+            )}
 
             <div className="success__card">
               <div>

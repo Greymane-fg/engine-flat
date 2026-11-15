@@ -10,7 +10,22 @@ npm run dev        # http://localhost:5173
 npm run build      # typecheck + production bundle
 npm run typecheck
 npm run smoke      # headless end-to-end flow test (JSDOM)
+npm run test:email # verifies the two-template EmailJS contract (no network)
 ```
+
+## Email setup
+
+Copy `.env.example` to `.env` and add three IDs plus your public key:
+
+```dotenv
+VITE_EMAILJS_SERVICE_ID=service_xxxxxxx
+VITE_EMAILJS_PUBLIC_KEY=xxxxxxxxxxxxxxxx
+VITE_EMAILJS_ADMIN_TEMPLATE_ID=template_xxxxxxx   # → your inbox
+VITE_EMAILJS_USER_TEMPLATE_ID=template_yyyyyyy    # → the merchant
+```
+
+Step-by-step template HTML and the full variable table live in
+[`docs/emailjs-setup.md`](docs/emailjs-setup.md).
 
 ---
 
@@ -55,6 +70,16 @@ npm run smoke      # headless end-to-end flow test (JSDOM)
 - Pause an individual service or pause assessments entirely.
 - Reset demo data.
 
+**Email routing (EmailJS)**
+- Every submission fires exactly two emails: one to your team inbox, one to the
+  merchant as a confirmation. Two template IDs total, shared by assessments and
+  package applications.
+- Sent in parallel — if the merchant's copy fails, yours still arrives.
+- The confirmation screen reflects what actually happened: success, partial, or a
+  manual fallback that never claims an email was sent when none was.
+- Admin console → Settings shows configuration state and can fire a test email.
+- Full setup guide: [`docs/emailjs-setup.md`](docs/emailjs-setup.md)
+
 **Legal & tracking**
 - Six policy modals (Terms, Privacy, Refunds, Cookies, Service Agreement, Assessment
   Disclaimer), all inside the page — no navigation away.
@@ -75,11 +100,13 @@ src/
     policies.ts          legal copy
   lib/
     assess.ts            live inspection + deterministic scoring engine
+    email.ts             EmailJS routing: two templates, delivery state
     utils.ts             currency, URL parsing, seeded PRNG, formatting
   components/            page sections + the modal system
   styles/                design tokens and per-area stylesheets
 scripts/
   smoke.tsx              headless flow test
+  email-test.tsx         EmailJS contract test with an injected transport
 ```
 
 ### Scoring

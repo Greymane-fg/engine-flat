@@ -7,6 +7,7 @@ import {
   CircleDashed,
   Gauge,
   Lock,
+  Mail,
   MessageCircle,
   ScanSearch,
   ShieldCheck,
@@ -24,6 +25,7 @@ import {
   type StoreSignals,
 } from '../lib/assess';
 import { parseStoreUrl, uid, formatDate, whatsappLink } from '../lib/utils';
+import { sendApplicationEmails, summariseDelivery, type DeliveryState, EMPTY_DELIVERY } from '../lib/email';
 import { ReportView } from './ReportView';
 import type { ReadinessReport } from '../types';
 
@@ -49,6 +51,7 @@ export function AssessmentModal({
   const [report, setReport] = useState<ReadinessReport | null>(null);
   const [scanStep, setScanStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [delivery, setDelivery] = useState<DeliveryState>(EMPTY_DELIVERY);
   const [values, setValues] = useState({
     storeUrl: prefill?.storeUrl ?? '',
     fullName: prefill?.fullName ?? '',
@@ -108,9 +111,8 @@ export function AssessmentModal({
     };
     const generated = generateReport(input, signals, { id: uid('rep') });
 
-    addReport(generated);
-    addApplication(
-      makeApplication({
+    const app = makeApplication(
+      {
         type: 'assessment',
         serviceFee: null,
         total: 0,
@@ -123,12 +125,27 @@ export function AssessmentModal({
           category: values.category,
           objective: values.objective,
           attachments: [],
+          consentGiven: true,
         },
-      }, applications),
+      },
+      applications,
     );
+
+    addReport(generated);
+
+    // Same two templates as a package application — the report block is
+    // included when one exists, and ignored by templates that omit it.
+    const outcome = await sendApplicationEmails(app, generated);
+    setDelivery(outcome);
+
+    addApplication({ ...app, delivery: outcome });
     setReport(generated);
     setStage('complete');
-    notify('Assessment complete. Your report is ready.');
+    notify(
+      outcome.complete
+        ? 'Assessment complete. Your report is on screen and on its way to your inbox.'
+        : 'Assessment complete. Your report is ready.',
+    );
   }
 
   function applyRecommendation() {
@@ -373,6 +390,35 @@ export function AssessmentModal({
               {report.normalisedUrl} · Generated {formatDate(report.createdAt)} · Review
               ID {report.id.slice(0, 10).toUpperCase()}
             </p>
+
+            {delivery.sent.includes('user') && (
+              <div className="delivery-note">
+                <Mail size={14} />
+                <span>
+                  A copy has been emailed to <strong>{values.email}</strong>, and our team
+                  has been notified.
+                </span>
+              </div>
+            )}
+            {delivery.sent.includes('admin') && !delivery.sent.includes('user') && (
+              <div className="delivery-note delivery-note--warn">
+                <AlertTriangle size={14} />
+                <span>
+                  Our team has been notified, but the copy to{' '}
+                  <strong>{values.email}</strong> could not be sent. You can download the
+                  summary below.
+                </span>
+              </div>
+            )}
+            {delivery.failed.some((f) => f.channel === 'admin') && (
+              <div className="delivery-note delivery-note--warn">
+                <AlertTriangle size={14} />
+                <span>
+                  {summariseDelivery(delivery).message} Your report is on this screen, and
+                  you can download a summary below.
+                </span>
+              </div>
+            )}
           </div>
           <div className="modal__body">
             <ReportView report={report} />

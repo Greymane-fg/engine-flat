@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import {
   Check,
   ChevronDown,
+  Mail,
   ExternalLink,
   Lock,
   LogOut,
@@ -12,8 +13,10 @@ import {
   Users,
 } from 'lucide-react';
 import { Modal } from './Modal';
-import { useApp } from '../store';
+import { useApp, makeApplication } from '../store';
+import { SITE } from '../config';
 import { APPLICATION_STAGES } from '../config';
+import { emailDiagnostics, sendApplicationEmails, isEmailConfigured } from '../lib/email';
 import { formatDateTime, money } from '../lib/utils';
 import type { Application } from '../store';
 import type { PackageTier, ServiceId } from '../types';
@@ -274,6 +277,26 @@ function ApplicationsTab({
                         <dd>{a.contact.requirements}</dd>
                       </div>
                     )}
+                    <div>
+                      <dt>Email delivery</dt>
+                      <dd>
+                        {a.delivery
+                          ? a.delivery.complete
+                            ? 'Team notified · merchant confirmed'
+                            : [
+                                a.delivery.sent.length
+                                  ? `Sent: ${a.delivery.sent.join(', ')}`
+                                  : 'Nothing sent',
+                                a.delivery.failed.length
+                                  ? `Failed: ${a.delivery.failed.map((f) => f.channel).join(', ')}`
+                                  : '',
+                                a.delivery.skipped.length ? 'Not configured' : '',
+                              ]
+                                .filter(Boolean)
+                                .join(' · ')
+                          : 'Not recorded'}
+                      </dd>
+                    </div>
                     {report && (
                       <div style={{ gridColumn: '1 / -1' }}>
                         <dt>Assessment</dt>
@@ -482,6 +505,7 @@ function ServicesTab({
 
 function SettingsTab() {
   const { settings, updateSettings, resetDemoData, applications, reports } = useApp();
+  const emailConfig = emailDiagnostics();
   const [brand, setBrand] = useState(settings.brandName);
   const [email, setEmail] = useState(settings.contactEmail);
   const [whatsapp, setWhatsapp] = useState(settings.whatsappDigits);
@@ -509,6 +533,10 @@ function SettingsTab() {
               readOnly
               style={{ color: 'var(--ink-muted)' }}
             />
+            <span className="field__hint">
+              All prices render in this currency. Change it in{' '}
+              <code>src/config.ts</code> so the symbol and locale stay in sync.
+            </span>
           </label>
         </div>
         <div className="admin-actions">
@@ -537,6 +565,54 @@ function SettingsTab() {
           />
         </div>
 
+        <div className="admin-block">
+          <div className="admin-block__head">
+            <div>
+              <strong>Email routing</strong>
+              <span>
+                Two EmailJS templates: one to the team inbox, one to the merchant.
+              </span>
+            </div>
+            <span className={`chip ${emailConfig.configured ? '' : 'chip--warn'}`}>
+              {emailConfig.configured ? 'Configured' : 'Not configured'}
+            </span>
+          </div>
+
+          <dl className="admin-detail-grid" style={{ marginTop: 12 }}>
+            <div>
+              <dt>Team notification template</dt>
+              <dd>{emailConfig.adminTemplateId || '—'}</dd>
+            </div>
+            <div>
+              <dt>Merchant confirmation template</dt>
+              <dd>{emailConfig.userTemplateId || '—'}</dd>
+            </div>
+            <div>
+              <dt>Service</dt>
+              <dd>{emailConfig.serviceId || '—'}</dd>
+            </div>
+            <div>
+              <dt>Team inbox</dt>
+              <dd>{emailConfig.adminEmail}</dd>
+            </div>
+          </dl>
+
+          <div className="admin-actions" style={{ marginTop: 14 }}>
+            <SendTestEmail />
+          </div>
+
+          {!emailConfig.configured && (
+            <div className="policy__notice" style={{ marginTop: 12 }}>
+              <ShieldCheck size={15} />
+              <span>
+                Submissions are saved on this device but not emailed until these are set
+                in <code>.env</code>: {emailConfig.missing.join(', ')}. See{' '}
+                <code>.env.example</code> and the README for the template variable list.
+              </span>
+            </div>
+          )}
+        </div>
+
         <div className="admin-toggle">
           <div>
             <strong>Demo data</strong>
@@ -561,6 +637,75 @@ function SettingsTab() {
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * Fires both templates with sample data so you can confirm each one renders
+ * correctly before a real merchant submits anything.
+ */
+function SendTestEmail() {
+  const { notify, settings } = useApp();
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
+
+  const run = async () => {
+    setBusy(true);
+    setResult(null);
+
+    const sample = makeApplication(
+      {
+        type: 'service',
+        serviceId: 'operational-validation',
+        packageId: 'ov-standard',
+        packageTier: 'Standard',
+        serviceFee: 1000,
+        adBudget: 500,
+        total: 1500,
+        contact: {
+          fullName: 'Test Merchant',
+          email: settings.contactEmail,
+          whatsapp: SITE.whatsapp,
+          storeUrl: 'https://example-store.com',
+          category: 'Fashion & Apparel',
+          requirements: 'This is a test submission from the team console.',
+          notes: 'No action required.',
+          attachments: [],
+          consentGiven: true,
+        },
+      },
+      [],
+    );
+
+    const outcome = await sendApplicationEmails(sample);
+    setBusy(false);
+
+    const label = outcome.complete
+      ? 'Both templates delivered.'
+      : outcome.failed.length
+        ? `Failed: ${outcome.failed.map((f) => `${f.channel} (${f.reason})`).join(', ')}`
+        : 'Not configured — add your EmailJS IDs to .env.';
+    setResult(label);
+    notify(label);
+  };
+
+  return (
+    <>
+      <button
+        className="btn btn--outline btn--sm"
+        onClick={() => void run()}
+        disabled={busy || !isEmailConfigured()}
+        type="button"
+      >
+        <Mail size={13} />
+        {busy ? 'Sending test…' : 'Send test email'}
+      </button>
+      {result && (
+        <span className="admin-row-note" style={{ alignSelf: 'center' }}>
+          {result}
+        </span>
+      )}
+    </>
   );
 }
 
