@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import {
+  AlertTriangle,
   Check,
   ChevronDown,
   Mail,
@@ -601,6 +602,13 @@ function SettingsTab() {
             <SendTestEmail />
           </div>
 
+          {emailConfig.warnings.length > 0 && (
+            <div className="policy__notice" style={{ marginTop: 12, borderColor: 'rgba(214,152,0,0.3)', background: 'rgba(214,152,0,0.07)' }}>
+              <AlertTriangle size={15} style={{ color: '#9a6a00' }} />
+              <span>{emailConfig.warnings.join(' ')}</span>
+            </div>
+          )}
+
           {!emailConfig.configured && (
             <div className="policy__notice" style={{ marginTop: 12 }}>
               <ShieldCheck size={15} />
@@ -670,7 +678,6 @@ function SendTestEmail() {
           category: 'Fashion & Apparel',
           requirements: 'This is a test submission from the team console.',
           notes: 'No action required.',
-          attachments: [],
           consentGiven: true,
         },
       },

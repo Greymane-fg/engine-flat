@@ -13,10 +13,14 @@ g.localStorage = dom.window.localStorage;
 g.location = dom.window.location;
 g.self = dom.window;
 
-process.env.VITE_EMAILJS_SERVICE_ID = 'service_test';
-process.env.VITE_EMAILJS_PUBLIC_KEY = 'pk_test';
-process.env.VITE_EMAILJS_ADMIN_TEMPLATE_ID = 'template_admin';
-process.env.VITE_EMAILJS_USER_TEMPLATE_ID = 'template_user';
+// Deliberately NOT setting VITE_ values: this verifies the shipped defaults
+// in src/lib/email.ts, i.e. what actually goes live.
+const EXPECTED = {
+  service: 'service_engine',
+  publicKey: 'QW0apJtjNMp6E4PP9',
+  admin: 'template_2awtneq', // to the team
+  user: 'template_mrb3g7f',  // to the merchant
+};
 
 const calls: any[] = [];
 let failMode: 'none' | 'user' | 'admin' | 'both' = 'none';
@@ -26,7 +30,7 @@ let failMode: 'none' | 'user' | 'admin' | 'both' = 'none';
 const transport = async (config: any, templateId: string, params: any) => {
   calls.push({ serviceId: config.serviceId, templateId, params });
   const mode = failMode;
-  const isAdmin = templateId === 'template_admin';
+  const isAdmin = templateId === EXPECTED.admin;
   if (mode === 'both') throw new Error('Network error');
   if (mode === 'user' && !isAdmin) throw new Error('Recipient rejected');
   if (mode === 'admin' && isAdmin) throw new Error('Quota exceeded');
@@ -35,10 +39,12 @@ const transport = async (config: any, templateId: string, params: any) => {
 const { createServer } = await import('vite');
 const server = await createServer({
   define: {
-    'import.meta.env.VITE_EMAILJS_SERVICE_ID': JSON.stringify('service_test'),
-    'import.meta.env.VITE_EMAILJS_PUBLIC_KEY': JSON.stringify('pk_test'),
-    'import.meta.env.VITE_EMAILJS_ADMIN_TEMPLATE_ID': JSON.stringify('template_admin'),
-    'import.meta.env.VITE_EMAILJS_USER_TEMPLATE_ID': JSON.stringify('template_user'),
+    // Simulate a real build with no .env: defaults must carry it.
+    'import.meta.env.VITE_EMAILJS_SERVICE_ID': 'undefined',
+    'import.meta.env.VITE_EMAILJS_PUBLIC_KEY': 'undefined',
+    'import.meta.env.VITE_EMAILJS_ADMIN_TEMPLATE_ID': 'undefined',
+    'import.meta.env.VITE_EMAILJS_USER_TEMPLATE_ID': 'undefined',
+    'import.meta.env.VITE_EMAILJS_ADMIN_EMAIL': 'undefined',
   },
   server: { middlewareMode: true },
   appType: 'custom',
@@ -48,6 +54,7 @@ const server = await createServer({
 
 try {
   const email = await server.ssrLoadModule('/src/lib/email.ts');
+  const EMAIL_CONFIG_PUBLIC_KEY = (email.EMAIL_CONFIG as { publicKey: string }).publicKey;
   const { makeApplication } = await server.ssrLoadModule('/src/store.tsx');
 
   const errors: string[] = [];
@@ -57,11 +64,17 @@ try {
   };
 
   console.log('\n--- configuration ---');
-  assert(email.isEmailConfigured(), 'config detected as complete');
+  assert(email.isEmailConfigured(), 'ships configured — no .env required');
   const diag = email.emailDiagnostics();
-  assert(diag.configured && diag.missing.length === 0, 'diagnostics report no missing vars');
-  assert(diag.adminTemplateId === 'template_admin', 'admin template id read from env');
-  assert(diag.userTemplateId === 'template_user', 'user template id read from env');
+  assert(diag.configured && diag.missing.length === 0, 'diagnostics report nothing missing');
+  assert(diag.serviceId === EXPECTED.service, `service id = ${EXPECTED.service}`);
+  assert(diag.adminTemplateId === EXPECTED.admin, 'admin template = the TEAM one (2awtneq)');
+  assert(diag.userTemplateId === EXPECTED.user, 'user template = the MERCHANT one (mrb3g7f)');
+  assert(diag.warnings.length === 0, 'no template-mapping warning');
+  assert(
+    diag.adminTemplateId !== diag.userTemplateId,
+    'the two IDs are distinct — merchant and team are not crossed',
+  );
 
   console.log('\n--- service application ---');
   const app = makeApplication({
@@ -79,7 +92,6 @@ try {
       storeUrl: 'https://adastore.com',
       category: 'Fashion & Apparel',
       requirements: 'Need validation before scaling',
-      attachments: [{ name: 'brand.pdf', size: 204800, type: 'application/pdf' }],
       consentGiven: true,
     },
   }, []);
@@ -88,14 +100,15 @@ try {
   calls.length = 0;
   let state = await email.sendApplicationEmails(app, undefined, undefined, transport);
   assert(calls.length === 2, 'exactly two emails sent');
-  assert(calls.some(c => c.templateId === 'template_admin'), 'admin template used');
-  assert(calls.some(c => c.templateId === 'template_user'), 'user template used');
-  assert(calls.every(c => c.serviceId === 'service_test'), 'service id applied to both');
+  assert(calls.some(c => c.templateId === EXPECTED.admin), 'admin template used');
+  assert(calls.some(c => c.templateId === EXPECTED.user), 'user template used');
+  assert(calls.every(c => c.serviceId === EXPECTED.service), 'service id applied to both');
   assert(state.complete === true, 'delivery reported complete');
   assert(state.sent.includes('admin') && state.sent.includes('user'), 'both channels recorded sent');
 
-  const adminVars = calls.find(c => c.templateId === 'template_admin').params;
-  const userVars = calls.find(c => c.templateId === 'template_user').params;
+  const adminVars = calls.find(c => c.templateId === EXPECTED.admin).params;
+  const userVars = calls.find(c => c.templateId === EXPECTED.user).params;
+  assert(EMAIL_CONFIG_PUBLIC_KEY === EXPECTED.publicKey, 'public key matches the shipped key');
   assert(adminVars.reference === app.reference, 'reference passed through');
   assert(/ENG-\d{4}-\d{4}/.test(adminVars.reference), 'reference format sequential');
   assert(userVars.to_email === 'ada@store.com', 'merchant template addressed to applicant');
@@ -106,7 +119,7 @@ try {
   assert(adminVars.advertising_budget === '$500', 'ad budget formatted separately');
   assert(adminVars.total_payment === '$1,500', 'total provided');
   assert(/held separately from the service fee/.test(adminVars.ad_budget_line), 'ad budget explained in words');
-  assert(/brand\.pdf \(200 KB\)/.test(adminVars.attachments), 'attachments serialised');
+  assert(adminVars.attachments === undefined, 'no attachment variable remains');
   assert(adminVars.has_report === '', 'no report block for a package application');
   assert(userVars.reply_to === 'ada@store.com', 'reply-to set to merchant');
 
@@ -145,12 +158,12 @@ try {
   );
   const assessment = makeApplication({
     type: 'assessment', serviceFee: null, total: 0, reportId: report.id,
-    contact: { fullName: 'Ada', email: 'a@b.co', whatsapp: '+23480123456', storeUrl: 'https://glowlab.com', attachments: [], consentGiven: true },
+    contact: { fullName: 'Ada', email: 'a@b.co', whatsapp: '+23480123456', storeUrl: 'https://glowlab.com', consentGiven: true },
   }, []);
   failMode = 'none';
   calls.length = 0;
   state = await email.sendApplicationEmails(assessment, report, undefined, transport);
-  const rVars = calls.find(c => c.templateId === 'template_admin').params;
+  const rVars = calls.find(c => c.templateId === EXPECTED.admin).params;
   assert(rVars.has_report === 'true', 'report flag set for assessments');
   assert(rVars.readiness_score === `${report.overall}%`, 'readiness score included');
   assert(rVars.current_stage === report.currentStage.label, 'current stage included');
@@ -158,6 +171,15 @@ try {
   assert(/Recommended:/.test(rVars.report_summary), 'recommendation included');
   assert(state.complete, 'assessment emails deliver');
   assert(rVars.submission_type === 'Store Readiness Assessment', 'assessment labelled distinctly');
+
+  console.log('\n--- identical template guard ---');
+  const crossed = email.emailDiagnostics({
+    serviceId: 's', publicKey: 'p',
+    adminTemplateId: 'template_same', userTemplateId: 'template_same',
+    adminEmail: 'x@y.z',
+  });
+  assert(crossed.warnings.length === 1, 'identical IDs raise a warning');
+  assert(/identical/i.test(crossed.warnings[0]), 'warning explains the risk');
 
   console.log('\n--- unconfigured fallback ---');
   const bare = { serviceId: '', publicKey: '', adminTemplateId: '', userTemplateId: '', adminEmail: 'x@y.z' };

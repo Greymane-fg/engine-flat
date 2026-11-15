@@ -22,6 +22,17 @@ confirmation failing must never stop you from hearing about a sale.
 2. **Email Services → Add New Service** (Gmail, Outlook, or custom SMTP).
 3. Copy the **Service ID** (`service_xxxxxxx`).
 
+## Ready-made templates
+
+Both templates are written and validated in [`docs/emailjs/`](emailjs/README.md):
+
+- [`1-team-notification.html`](emailjs/1-team-notification.html) → `template_2awtneq`
+- [`2-merchant-confirmation.html`](emailjs/2-merchant-confirmation.html) → `template_mrb3g7f`
+
+Paste them straight into the editor. The service, public key and both template IDs are
+already compiled in as defaults, so no `.env` is required. The generic walkthrough
+below is kept for reference if you would rather build your own.
+
 ## 2. Create Template 1 — to yourself
 
 **Email Templates → Create New Template**
@@ -60,7 +71,6 @@ Body:
 <h3>Requirements</h3>
 <p>{{requirements}}</p>
 <p>{{additional_info}}</p>
-<p>Attachments: {{attachments}}</p>
 
 {{#if has_report}}
   <h3>Readiness report</h3>
@@ -166,7 +176,6 @@ Both templates read from one flat variable set. Use whatever you need; ignore th
 | `ad_budget_line` | `$500 allocated to advertising (held separately from the service fee)` | Ready-made sentence |
 | `requirements` | free text | |
 | `additional_info` | free text | |
-| `attachments` | `brand.pdf (200 KB)` | **Names and sizes only** — see below |
 | `has_report` | `true` or empty | Use for `{{#if has_report}}` |
 | `readiness_score` | `70%` | |
 | `current_stage` | `Stage 03 — Organic Discoverability` | |
@@ -176,10 +185,10 @@ Both templates read from one flat variable set. Use whatever you need; ignore th
 
 ## Two things to know
 
-**Attachments are not transmitted.** EmailJS's browser SDK sends variables, not files.
-The templates receive `attachments` as a list of filenames and sizes — enough to know
-something was attached and to ask for it. Real file handling needs a backend or a
-storage bucket; wire that before promising merchants their uploads are delivered.
+**File uploads are not supported.** EmailJS's browser SDK sends variables, not files.
+File uploads are not currently offered anywhere in the form. If they are reintroduced,
+they cannot travel through the browser SDK — that requires a backend or a storage
+bucket.
 
 **The public key is public.** That is by design, but it means anyone can call your
 service from a script. In the EmailJS dashboard enable **rate limiting** and

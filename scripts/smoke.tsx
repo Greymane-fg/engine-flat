@@ -26,6 +26,15 @@ g.IntersectionObserver = class {
   disconnect() {}
 };
 g.fetch = async () => { throw new Error('CORS'); };
+// EmailJS posts here; fail fast instead of retrying on a dead network.
+const realFetch = g.fetch;
+g.fetch = async (input: any, init?: any) => {
+  const url = typeof input === 'string' ? input : input?.url ?? '';
+  if (/emailjs|api\.emailjs/i.test(url)) {
+    return { ok: false, status: 0, json: async () => ({}), text: async () => '' };
+  }
+  return realFetch(input, init);
+};
 g.matchMedia = (q: string) => ({ matches: false, media: q, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {}, onchange: null, dispatchEvent: () => false });
 dom.window.matchMedia = g.matchMedia;
 Object.defineProperty(g, 'localStorage', { value: dom.window.localStorage, configurable: true });
@@ -117,7 +126,14 @@ try {
   const consent = document.querySelector('.assess-consent input') as HTMLInputElement;
   await act(async () => { consent.click(); });
   await click(byText('.summary-card button', /Submit Application/));
-  assert(/Your Request Has Been Received/.test(text()), 'success screen shown');
+  // The submit handler now awaits both EmailJS sends before advancing.
+  await act(async () => { await new Promise((r) => setTimeout(r, 1200)); });
+  const successText = text();
+  assert(/Your Request Has Been Received|Almost there/.test(successText), 'success screen shown');
+  assert(
+    /Delivery issue|A confirmation has been sent|saved on this device|send it to us/i.test(successText),
+    'delivery outcome is stated honestly, not assumed',
+  );
   assert(/ENG-\d{4}-\d{4}/.test(text()), 'application reference issued');
   assert(/ENG-\d{4}-0001/.test(text()), 'reference is sequential (first of the year)');
   assert(/2,500/.test(text()), 'submitted total retained');

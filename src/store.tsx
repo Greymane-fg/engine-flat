@@ -24,8 +24,6 @@ import type { DeliveryState } from './lib/email';
 /* Types                                                               */
 /* ------------------------------------------------------------------ */
 
-export type AttachmentMeta = { name: string; size: number; type: string };
-
 export type ApplicationContact = {
   fullName: string;
   email: string;
@@ -35,7 +33,6 @@ export type ApplicationContact = {
   objective?: string;
   requirements?: string;
   notes?: string;
-  attachments: AttachmentMeta[];
   /** Merchant accepted the assessment/service disclaimer. */
   consentGiven?: boolean;
 };

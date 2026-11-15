@@ -24,8 +24,10 @@ VITE_EMAILJS_ADMIN_TEMPLATE_ID=template_xxxxxxx   # → your inbox
 VITE_EMAILJS_USER_TEMPLATE_ID=template_yyyyyyy    # → the merchant
 ```
 
-Step-by-step template HTML and the full variable table live in
-[`docs/emailjs-setup.md`](docs/emailjs-setup.md).
+The deployment's service, public key and both template IDs ship as defaults in
+`src/lib/email.ts` — no `.env` is needed. Ready-to-paste template HTML lives in
+[`docs/emailjs/`](docs/emailjs/README.md), with the full variable table and the
+generic walkthrough in [`docs/emailjs-setup.md`](docs/emailjs-setup.md).
 
 ---
 
@@ -55,8 +57,7 @@ Step-by-step template HTML and the full variable table live in
 **Path B — direct purchase**
 - Three fixed-price packages per service, each with deliverables, exclusions,
   turnaround, revision allowance and a select button.
-- Application form, optional attachments, review screen and success state with a
-  reference number.
+- Application form, review screen and success state with a reference number.
 
 **Operational Validation pricing**
 - Two separate cost components, stated as such throughout: the service fee and the
