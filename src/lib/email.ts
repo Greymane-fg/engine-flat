@@ -251,9 +251,6 @@ export function buildVariables(
     /* Free text ----------------------------------------------------- */
     requirements: contact.requirements || 'Not provided',
     additional_info: contact.notes || 'Not provided',
-    attachments: contact.attachments.length
-      ? contact.attachments.map((a) => `${a.name} (${Math.round(a.size / 1024)} KB)`).join(', ')
-      : 'None',
 
     /* Report (assessments only) ------------------------------------- */
     has_report: report ? 'true' : '',
@@ -278,7 +275,7 @@ export const TEMPLATE_VARIABLES = {
   identity: ['reference', 'submission_type', 'submitted_at', 'year'],
   merchant: ['customer_name', 'customer_email', 'customer_whatsapp', 'store_url', 'business_category', 'objective'],
   commercial: ['service', 'package_name', 'service_fee', 'advertising_budget', 'total_payment', 'ad_budget_line'],
-  freeText: ['requirements', 'additional_info', 'attachments'],
+  freeText: ['requirements', 'additional_info'],
   report: ['has_report', 'readiness_score', 'current_stage', 'report_summary'],
   brand: ['brand_name', 'brand_email', 'brand_whatsapp', 'support_hours', 'admin_email', 'to_email', 'to_name', 'reply_to'],
 } as const;

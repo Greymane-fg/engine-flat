@@ -8,9 +8,7 @@ import {
   FileText,
   Mail,
   Minus,
-  Paperclip,
   Sparkles,
-  X,
 } from 'lucide-react';
 import { Modal } from './Modal';
 import { Field, SelectField, TextAreaField } from './ui';
@@ -71,7 +69,6 @@ export function ServiceModal({
     return service.packages.find((p) => p.featured)?.id ?? service.packages[0].id;
   });
   const [values, setValues] = useState<FormValues>(EMPTY_FORM);
-  const [files, setFiles] = useState<File[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [reference, setReference] = useState<string | null>(null);
   const [delivery, setDelivery] = useState<DeliveryState>(EMPTY_DELIVERY);
@@ -124,7 +121,6 @@ export function ServiceModal({
         category: values.category,
         requirements: values.requirements,
         notes: values.notes,
-        attachments: files.map((f) => ({ name: f.name, size: f.size, type: f.type })),
         consentGiven: true,
       },
     }, applications);
@@ -447,40 +443,6 @@ export function ServiceModal({
                   </div>
                 )}
 
-                <div className="file-field">
-                  <label className="file-field__drop" htmlFor="a-files">
-                    <Paperclip size={16} />
-                    <span>
-                      <strong>Attach supporting files</strong>
-                      <em>Brand assets, screenshots, evidence of testing — optional.</em>
-                    </span>
-                    <input
-                      id="a-files"
-                      type="file"
-                      multiple
-                      onChange={(e) => setFiles(Array.from(e.target.files ?? []).slice(0, 5))}
-                    />
-                  </label>
-                  {files.length > 0 && (
-                    <ul className="file-field__list">
-                      {files.map((f) => (
-                        <li key={f.name}>
-                          <FileText size={12} />
-                          {f.name}
-                          <span>{Math.round(f.size / 1024)} KB</span>
-                          <button
-                            type="button"
-                            onClick={() => setFiles((prev) => prev.filter((x) => x.name !== f.name))}
-                            aria-label={`Remove ${f.name}`}
-                          >
-                            <X size={12} />
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-
                 <label className="assess-consent" style={{ marginTop: 20 }}>
                   <input
                     type="checkbox"
@@ -621,12 +583,6 @@ export function ServiceModal({
                   <dt>Deliverables</dt>
                   <dd>
                     {pkg.deliverables.length} items · {pkg.turnaround}
-                  </dd>
-                </div>
-                <div>
-                  <dt>Attachments</dt>
-                  <dd>
-                    {files.length ? files.map((f) => f.name).join(', ') : 'None'}
                   </dd>
                 </div>
               </dl>

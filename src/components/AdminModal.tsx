@@ -678,7 +678,6 @@ function SendTestEmail() {
           category: 'Fashion & Apparel',
           requirements: 'This is a test submission from the team console.',
           notes: 'No action required.',
-          attachments: [],
           consentGiven: true,
         },
       },

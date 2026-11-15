@@ -57,8 +57,7 @@ generic walkthrough in [`docs/emailjs-setup.md`](docs/emailjs-setup.md).
 **Path B — direct purchase**
 - Three fixed-price packages per service, each with deliverables, exclusions,
   turnaround, revision allowance and a select button.
-- Application form, optional attachments, review screen and success state with a
-  reference number.
+- Application form, review screen and success state with a reference number.
 
 **Operational Validation pricing**
 - Two separate cost components, stated as such throughout: the service fee and the

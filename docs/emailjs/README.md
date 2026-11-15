@@ -51,7 +51,7 @@ variables render as empty, and `{{#if}}` blocks disappear when falsy.
 **Commercial** (applications) — `service` · `package_name` · `service_fee` ·
 `advertising_budget` · `total_payment` · `ad_budget_line`
 
-**Free text** — `requirements` · `additional_info` · `attachments`
+**Free text** — `requirements` · `additional_info`
 
 **Report** (assessments) — `has_report` · `readiness_score` · `current_stage` ·
 `report_summary`
@@ -87,9 +87,9 @@ here is inline CSS for that reason — keep it that way when editing.
 - **Rate limiting + reCAPTCHA** — enable both on the service in the EmailJS dashboard,
   and restrict allowed origins to your domain. The public key is visible in the page
   source by design; without these, anyone can spend your quota.
-- **Attachments are names only.** `{{attachments}}` renders something like
-  `brand.pdf (200 KB)`. EmailJS's browser SDK cannot transmit files. If merchants are
-  told their uploads arrive, that promise needs a backend or storage bucket first.
+- **File uploads are not supported.** The form no longer accepts attachments. If they
+  are reinstated, EmailJS's browser SDK still cannot transmit files — that needs a
+  backend or storage bucket, not a template change.
 - **Keep the wording honest.** Template 2 says "received", not "confirmed", because the
   specialist sets terms afterwards. If that copy changes, change the success screen in
   `src/components/ServiceModal.tsx` to match.

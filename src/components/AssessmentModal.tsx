@@ -124,7 +124,6 @@ export function AssessmentModal({
           storeUrl: parsed.normalised,
           category: values.category,
           objective: values.objective,
-          attachments: [],
           consentGiven: true,
         },
       },

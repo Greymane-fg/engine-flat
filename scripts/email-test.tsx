@@ -92,7 +92,6 @@ try {
       storeUrl: 'https://adastore.com',
       category: 'Fashion & Apparel',
       requirements: 'Need validation before scaling',
-      attachments: [{ name: 'brand.pdf', size: 204800, type: 'application/pdf' }],
       consentGiven: true,
     },
   }, []);
@@ -120,7 +119,7 @@ try {
   assert(adminVars.advertising_budget === '$500', 'ad budget formatted separately');
   assert(adminVars.total_payment === '$1,500', 'total provided');
   assert(/held separately from the service fee/.test(adminVars.ad_budget_line), 'ad budget explained in words');
-  assert(/brand\.pdf \(200 KB\)/.test(adminVars.attachments), 'attachments serialised');
+  assert(adminVars.attachments === undefined, 'no attachment variable remains');
   assert(adminVars.has_report === '', 'no report block for a package application');
   assert(userVars.reply_to === 'ada@store.com', 'reply-to set to merchant');
 
@@ -159,7 +158,7 @@ try {
   );
   const assessment = makeApplication({
     type: 'assessment', serviceFee: null, total: 0, reportId: report.id,
-    contact: { fullName: 'Ada', email: 'a@b.co', whatsapp: '+23480123456', storeUrl: 'https://glowlab.com', attachments: [], consentGiven: true },
+    contact: { fullName: 'Ada', email: 'a@b.co', whatsapp: '+23480123456', storeUrl: 'https://glowlab.com', consentGiven: true },
   }, []);
   failMode = 'none';
   calls.length = 0;
