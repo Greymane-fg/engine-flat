@@ -402,7 +402,6 @@
   line-height: 1.2;
   letter-spacing: -0.02em;
   color: var(--on-dark);
-  min-height: 2.4em;
 }
 
 .stage-card__title--premium {
@@ -416,7 +415,6 @@
   font-size: 12.4px;
   line-height: 1.55;
   color: rgba(247, 244, 251, 0.56);
-  min-height: 6.2em;
 }
 
 .stage-card__list {
@@ -489,13 +487,6 @@
 
 .stage-card__cta--premium {
   color: var(--chartreuse);
-}
-
-@media (max-width: 1099px) {
-  .stage-card__blurb,
-  .stage-card__title {
-    min-height: 0;
-  }
 }
 
 .stages__foot {
