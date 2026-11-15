@@ -22,6 +22,17 @@ confirmation failing must never stop you from hearing about a sale.
 2. **Email Services → Add New Service** (Gmail, Outlook, or custom SMTP).
 3. Copy the **Service ID** (`service_xxxxxxx`).
 
+## Ready-made templates
+
+Both templates are written and validated in [`docs/emailjs/`](emailjs/README.md):
+
+- [`1-team-notification.html`](emailjs/1-team-notification.html) → `template_2awtneq`
+- [`2-merchant-confirmation.html`](emailjs/2-merchant-confirmation.html) → `template_mrb3g7f`
+
+Paste them straight into the editor. The service, public key and both template IDs are
+already compiled in as defaults, so no `.env` is required. The generic walkthrough
+below is kept for reference if you would rather build your own.
+
 ## 2. Create Template 1 — to yourself
 
 **Email Templates → Create New Template**

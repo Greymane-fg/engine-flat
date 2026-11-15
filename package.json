@@ -10,7 +10,8 @@
     "preview": "vite preview --host 0.0.0.0",
     "typecheck": "tsc -b --noEmit",
     "smoke": "vite-node scripts/smoke.tsx",
-    "test:email": "vite-node scripts/email-test.tsx"
+    "test:email": "vite-node scripts/email-test.tsx",
+    "test": "vite-node scripts/smoke.tsx && vite-node scripts/email-test.tsx"
   },
   "dependencies": {
     "@emailjs/browser": "^5.0.3",
