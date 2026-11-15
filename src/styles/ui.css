@@ -1,0 +1,328 @@
+/* ==========================================================================
+   UI PRIMITIVES — fields, badges, rings, misc
+   ========================================================================== */
+
+/* Forms ------------------------------------------------------------------ */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.field__label {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--ink-soft);
+}
+
+.field__label em {
+  font-style: normal;
+  color: var(--royal);
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 13px 15px;
+  border-radius: var(--r-sm);
+  border: 1px solid rgba(23, 21, 27, 0.14);
+  background: #fff;
+  color: var(--ink);
+  font-size: 14.5px;
+  transition:
+    border-color var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease),
+    background var(--dur) var(--ease);
+  appearance: none;
+}
+
+.field select {
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+.field__select {
+  position: relative;
+}
+
+.field__select::after {
+  content: '';
+  position: absolute;
+  right: 17px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-right: 1.6px solid var(--ink-muted);
+  border-bottom: 1.6px solid var(--ink-muted);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 92px;
+  line-height: 1.6;
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: rgba(23, 21, 27, 0.32);
+}
+
+.field input:hover,
+.field select:hover,
+.field textarea:hover {
+  border-color: rgba(23, 21, 27, 0.26);
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--royal);
+  box-shadow: 0 0 0 3px rgba(103, 65, 200, 0.14);
+}
+
+.field__hint {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.field__error {
+  font-size: 12px;
+  font-weight: 500;
+  color: #b4262f;
+}
+
+.field--error input,
+.field--error select,
+.field--error textarea {
+  border-color: #d9535b;
+  background: #fff7f7;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.form-grid > .span-2 {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 620px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-grid > .span-2 {
+    grid-column: auto;
+  }
+}
+
+/* Status badges ---------------------------------------------------------- */
+
+.status {
+  --status-ink: var(--ink-soft);
+  --status-bg: rgba(23, 21, 27, 0.06);
+  --status-line: rgba(23, 21, 27, 0.1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px 5px 8px;
+  border-radius: var(--r-pill);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  color: var(--status-ink);
+  background: var(--status-bg);
+  border: 1px solid var(--status-line);
+}
+
+.status__icon {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--status-ink);
+  color: #fff;
+}
+
+.status--passed {
+  --status-ink: #1f7a4d;
+  --status-bg: rgba(31, 122, 77, 0.08);
+  --status-line: rgba(31, 122, 77, 0.2);
+}
+
+.status--needs-attention {
+  --status-ink: #9a6a00;
+  --status-bg: rgba(214, 152, 0, 0.1);
+  --status-line: rgba(214, 152, 0, 0.24);
+}
+
+.status--not-ready {
+  --status-ink: #b4262f;
+  --status-bg: rgba(180, 38, 47, 0.075);
+  --status-line: rgba(180, 38, 47, 0.2);
+}
+
+.status--not-validated {
+  --status-ink: #5b4a86;
+  --status-bg: rgba(103, 65, 200, 0.08);
+  --status-line: rgba(103, 65, 200, 0.2);
+}
+
+.status--not-yet-eligible {
+  --status-ink: var(--ink-muted);
+  --status-bg: rgba(23, 21, 27, 0.05);
+  --status-line: rgba(23, 21, 27, 0.1);
+}
+
+.status--dark {
+  --status-ink: var(--lavender);
+}
+
+/* Score ring ------------------------------------------------------------- */
+
+.ring {
+  position: relative;
+  width: var(--ring-size);
+  height: var(--ring-size);
+  flex: 0 0 auto;
+}
+
+.ring svg {
+  overflow: visible;
+}
+
+.ring__track {
+  fill: none;
+  stroke: rgba(23, 21, 27, 0.09);
+}
+
+.ring__value {
+  fill: none;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1200ms var(--ease);
+}
+
+.ring--violet .ring__value {
+  stroke: url(#ringGradient);
+  stroke: var(--royal);
+}
+
+.ring--chartreuse .ring__value {
+  stroke: var(--chartreuse);
+}
+
+.ring__label {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  gap: 2px;
+}
+
+.ring__label strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: calc(var(--ring-size) * 0.245);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.ring__label span {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.ring--on-dark .ring__track {
+  stroke: rgba(255, 255, 255, 0.14);
+}
+
+.ring--on-dark .ring__label strong {
+  color: var(--on-dark);
+}
+
+.ring--on-dark .ring__label span {
+  color: var(--on-dark-muted);
+}
+
+/* Stage number ----------------------------------------------------------- */
+
+.stage-num {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--royal);
+}
+
+.stage-num--premium {
+  color: #8a6b00;
+}
+
+.divider {
+  height: 1px;
+  background: var(--line-light);
+  border: 0;
+}
+
+.divider--dark {
+  background: var(--line-dark);
+}
+
+/* Toast ------------------------------------------------------------------ */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  z-index: var(--z-toast);
+  transform: translate(-50%, 20px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 20px;
+  border-radius: var(--r-pill);
+  background: rgba(23, 19, 31, 0.94);
+  border: 1px solid rgba(217, 243, 106, 0.32);
+  backdrop-filter: blur(18px);
+  color: var(--on-dark);
+  font-size: 13.5px;
+  font-weight: 500;
+  box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.8);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 300ms var(--ease),
+    transform 400ms var(--ease);
+  max-width: min(92vw, 460px);
+}
+
+.toast--in {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.toast svg {
+  color: var(--chartreuse);
+  flex: 0 0 auto;
+}
