@@ -34,7 +34,7 @@
   /* Text */
   --ink: var(--forest);
   --ink-soft: #3a514d;
-  --ink-muted: #5d736e;
+  --ink-muted: #556b66;
   --on-dark: var(--mist);
   --on-dark-soft: rgba(233, 237, 230, 0.76);
   --on-dark-muted: rgba(233, 237, 230, 0.56);

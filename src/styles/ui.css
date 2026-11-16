@@ -99,14 +99,14 @@
 .field__error {
   font-size: 12px;
   font-weight: 500;
-  color: #b4262f;
+  color: #a8282f;
 }
 
 .field--error input,
 .field--error select,
 .field--error textarea {
   border-color: #d9535b;
-  background: #fff7f7;
+  background: #fdf3f3;
 }
 
 .form-grid {
@@ -159,27 +159,27 @@
 }
 
 .status--passed {
-  --status-ink: #1f7a4d;
-  --status-bg: rgba(31, 122, 77, 0.08);
-  --status-line: rgba(31, 122, 77, 0.2);
+  --status-ink: #1c6b4a;
+  --status-bg: rgba(28, 107, 74, 0.09);
+  --status-line: rgba(28, 107, 74, 0.24);
 }
 
 .status--needs-attention {
-  --status-ink: #9a6a00;
-  --status-bg: rgba(214, 152, 0, 0.1);
-  --status-line: rgba(214, 152, 0, 0.24);
+  --status-ink: #8a6300;
+  --status-bg: rgba(180, 130, 20, 0.1);
+  --status-line: rgba(180, 130, 20, 0.26);
 }
 
 .status--not-ready {
-  --status-ink: #b4262f;
-  --status-bg: rgba(180, 38, 47, 0.075);
-  --status-line: rgba(180, 38, 47, 0.2);
+  --status-ink: #a8282f;
+  --status-bg: rgba(168, 40, 47, 0.08);
+  --status-line: rgba(168, 40, 47, 0.22);
 }
 
 .status--not-validated {
-  --status-ink: #5b4a86;
+  --status-ink: var(--pine);
   --status-bg: rgba(32, 86, 83, 0.08);
-  --status-line: rgba(32, 86, 83, 0.2);
+  --status-line: rgba(32, 86, 83, 0.22);
 }
 
 .status--not-yet-eligible {
@@ -276,7 +276,7 @@
 }
 
 .stage-num--premium {
-  color: #8a6b00;
+  color: var(--ink-muted);
 }
 
 .divider {
