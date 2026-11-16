@@ -244,7 +244,10 @@ export function buildVariables(
     package_name: packageLabel || '—',
     service_fee: app.serviceFee === null ? '—' : money(app.serviceFee),
     advertising_budget: typeof app.adBudget === 'number' ? money(app.adBudget) : '—',
-    total_payment: money(app.total),
+    total_payment:
+      app.total === null
+        ? 'Quoted after review'
+        : money(app.total),
     // Ready-made sentence so templates stay simple.
     ad_budget_line: adBudgetLine,
 

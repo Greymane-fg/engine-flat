@@ -138,8 +138,32 @@ try {
   assert(/ENG-\d{4}-0001/.test(text()), 'reference is sequential (first of the year)');
   assert(/2,500/.test(text()), 'submitted total retained');
 
+  // 5b. Unpriced package must never show a $0 total
+  await click(document.querySelector('.modal__close')!);
+  const sfRow = Array.from(document.querySelectorAll('.svc-row')).find((r) =>
+    /Structural Foundation/.test(r.textContent ?? ''),
+  ) as HTMLElement;
+  await click(sfRow.querySelector('button'));
+  const premiumCard = Array.from(document.querySelectorAll('.pkg')).find((p) =>
+    /Premium/.test(p.textContent ?? ''),
+  ) as HTMLElement;
+  await click(premiumCard.querySelector('button'));
+  const quoteText = text();
+  assert(/Quoted after review/.test(quoteText), 'unpriced package asks for a quote');
+  assert(!/Total expected payment\s*\$0(?!\d)/.test(quoteText), 'unpriced package never totals $0');
+  assert(/priced after discovery/i.test(quoteText), 'explains when the price arrives');
+  await click(document.querySelector('.modal__close')!);
+
+  // 5c. Exclusions are collapsed but still reachable
+  await click(sfRow.querySelector('button'));
+  const det = document.querySelector('.pkg__details') as HTMLDetailsElement;
+  assert(det !== null && !det.open, 'exclusions collapsed by default');
+  assert(det.querySelectorAll('li').length > 0, 'exclusion content still in the DOM for a11y/SEO');
+  await click(det.querySelector('summary'));
+  assert(det.open, 'exclusions expand on click');
+  await click(document.querySelector('.modal__close')!);
+
   // 6. Policy modal
-  await click(document.querySelector('.modal__close'));
   const legalBtn = byText('.footer__legal-links button', /Privacy Policy/);
   await click(legalBtn);
   assert(/Information we collect/.test(text()), 'privacy policy modal opens');

@@ -7,47 +7,37 @@ import { StageNumber } from './ui';
 const REQUIREMENT_SUMMARY: Record<number, string[]> = {
   1: [
     'Account, domain and SSL configured',
-    'Payment gateways and checkout settings live',
-    'Shipping zones, rates and fulfilment structure',
-    'Privacy, refund, terms and shipping policies',
-    'Navigation, collections and essential integrations',
+    'Payments, shipping and fulfilment live',
+    'Policies, navigation and collections in place',
   ],
   2: [
     'Logo, colour system and typography',
-    'Homepage hero, value proposition and trust',
-    'Product galleries, descriptions and variants',
-    'Collection, search, cart and checkout experience',
-    'Mobile responsiveness and conversion design',
+    'Homepage, product pages and cart designed',
+    'Mobile responsive and conversion-focused',
   ],
   3: [
-    'Technical SEO, metadata and schema markup',
-    'Sitemap, indexing and Search Console',
-    'Merchant Center eligibility and product feeds',
-    'AEO: question-led, extractable content',
-    'GEO: entity consistency and AI-answer readiness',
+    'Technical SEO, metadata and schema',
+    'Merchant feeds and AEO content',
+    'GEO readiness for AI answer engines',
   ],
   4: [
-    'Test purchases and checkout verification',
-    'Payments, shipping calculations and notifications',
-    'Fulfilment workflow and inventory sync',
-    'Controlled baseline marketing exercise',
-    'Traffic, conversion and CPA measurement',
+    'Test purchases and checkout verified',
+    'Fulfilment and tracking confirmed',
+    'Controlled baseline marketing test',
   ],
   5: [
     'Market and competitor intelligence',
-    'Custom acquisition and funnel architecture',
-    'Creative strategy, angles and copy',
-    'Meta, Google and TikTok campaign execution',
-    'CRO, retention and continuous optimisation',
+    'Custom acquisition strategy',
+    'Creative, campaigns and optimisation',
   ],
 };
 
 const STAGE_BLURB: Record<number, string> = {
-  1: 'The technical and administrative machinery required for the store to function properly — not branding or visual design.',
-  2: 'Transform the technical store into a recognisable, professional and conversion-conscious shopping experience.',
-  3: 'Be found across search engines, social discovery platforms and AI-powered answer engines — not only paid traffic.',
-  4: 'Prove the store works and that its products can generate purchases under real market conditions before scaling spend.',
-  5: 'An expert-led growth engagement built around your store, products, audience and commercial objectives.',
+  1: 'The technical machinery the store needs to function. Not branding.',
+  2: 'Turn a working store into a brand people trust and buy from.',
+  3: 'Be found in search, social and AI answers — not just paid ads.',
+  4: 'Prove the store works before you scale spending on it.',
+  5: 'An expert-led growth engagement built around your business.',
 };
 
 export function Stages() {
@@ -130,10 +120,7 @@ export function Stages() {
         </ol>
 
         <div className="stages__foot reveal">
-          <p>
-            A critical failure in an earlier stage cannot be overridden by a high score
-            in a later one. Progress is sequential, and the assessment enforces that.
-          </p>
+          <p>Progress is sequential — a later win cannot mask an earlier failure.</p>
           <button
             className="btn btn--glass"
             onClick={() => openModal({ kind: 'assessment' })}

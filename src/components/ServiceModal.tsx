@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
+  ChevronDown,
   Clock,
   FileText,
   Mail,
@@ -77,8 +78,11 @@ export function ServiceModal({
   if (!service) return null;
   const pkg = service.packages.find((p) => p.id === selectedId) ?? service.packages[0];
   const budget = Math.max(0, Number(values.adBudget.replace(/[^\d.]/g, '')) || 0);
-  const fee = pkg.price ?? 0;
-  const total = fee + (service.adBudget ? budget : 0);
+  // A null price means "to be confirmed" — the total must stay unknown rather
+  // than falling back to zero.
+  const fee = pkg.price;
+  const total: number | null =
+    fee === null ? null : fee + (service.adBudget ? budget : 0);
 
   const set = (k: keyof FormValues) => (v: string | boolean) =>
     setValues((s) => ({ ...s, [k]: v }));
@@ -261,8 +265,18 @@ export function ServiceModal({
                       </ul>
                     </div>
 
-                    <div className="pkg__section pkg__section--excl">
-                      <h4>Exclusions</h4>
+                    {/* Exclusions are due diligence, not decision-making.
+                        Collapsed by default so the card reads as a price and a
+                        promise; still one click away, and fully in the DOM for
+                        anyone who wants to check what is not included. */}
+                    <details className="pkg__section pkg__section--excl pkg__details">
+                      <summary>
+                        <span>
+                          Not included
+                          <em>{p.exclusions.length} exclusions</em>
+                        </span>
+                        <ChevronDown size={13} aria-hidden="true" />
+                      </summary>
                       <ul className="pkg__list pkg__list--excl">
                         {p.exclusions.map((d) => (
                           <li key={d}>
@@ -271,7 +285,7 @@ export function ServiceModal({
                           </li>
                         ))}
                       </ul>
-                    </div>
+                    </details>
 
                     <button
                       className={`btn ${
@@ -470,7 +484,7 @@ export function ServiceModal({
                         {service.adBudget ? 'Operational Validation' : 'Service fee'} —{' '}
                         {pkg.tier}
                       </dt>
-                      <dd>{pkg.price === null ? 'TBC' : money(pkg.price)}</dd>
+                      <dd>{pkg.price === null ? 'To be confirmed' : money(pkg.price)}</dd>
                     </div>
                     {service.adBudget && (
                       <div>
@@ -480,14 +494,20 @@ export function ServiceModal({
                     )}
                     <div className="summary-card__total">
                       <dt>Total expected payment</dt>
-                      <dd>{money(total)}</dd>
+                      <dd>{total === null ? 'Quoted after review' : money(total)}</dd>
                     </div>
                   </dl>
 
-                  {service.adBudget && (
+                  {service.adBudget && total !== null && (
                     <p className="summary-card__note">
                       {money(fee)} is the service fee. {money(budget)} is allocated to
                       advertising.
+                    </p>
+                  )}
+                  {pkg.price === null && (
+                    <p className="summary-card__note">
+                      This package is priced after discovery. Submit an application and
+                      you will receive a fixed quote before any payment is requested.
                     </p>
                   )}
 
@@ -563,7 +583,7 @@ export function ServiceModal({
                 )}
                 <div className="review__total">
                   <dt>Total expected payment</dt>
-                  <dd>{money(total)}</dd>
+                  <dd>{total === null ? 'Quoted after review' : money(total)}</dd>
                 </div>
                 <div>
                   <dt>Contact</dt>
@@ -657,8 +677,8 @@ export function ServiceModal({
                 </strong>
               </div>
               <div>
-                <span>Total</span>
-                <strong>{money(total)}</strong>
+                <span>{total === null ? 'Pricing' : 'Total'}</span>
+                <strong>{total === null ? 'Quoted after review' : money(total)}</strong>
               </div>
               <div>
                 <span>Status</span>

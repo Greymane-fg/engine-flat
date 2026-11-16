@@ -56,9 +56,8 @@ export function Introduction() {
             </div>
             <h3 className="h3 path-card__title">Assess My Store</h3>
             <p className="path-card__text">
-              Submit your Shopify URL and receive a structured assessment of your
-              store's readiness — scored across all five stages, with the critical
-              issues and the recommended next step.
+              Submit your store URL and get a scored readiness report — current stage,
+              critical issues and the recommended next step.
             </p>
             <ul className="path-card__list">
               <li>
@@ -68,7 +67,7 @@ export function Introduction() {
                 <Layers size={15} /> Stage-by-stage breakdown
               </li>
               <li>
-                <Compass size={15} /> Recommended package and estimated cost
+                <Compass size={15} /> Recommended package and cost
               </li>
             </ul>
             <button
@@ -89,16 +88,15 @@ export function Introduction() {
             </div>
             <h3 className="h3 path-card__title">I Know What I Need</h3>
             <p className="path-card__text path-card__text--dark">
-              Skip the assessment and go straight to the catalogue. Compare fixed-price
-              packages across setup, branding, discoverability, validation and Genius
-              Marketing.
+              Skip the assessment and go straight to the catalogue. Fixed-price packages
+              across setup, branding, discovery, validation and Genius Marketing.
             </p>
             <ul className="path-card__list path-card__list--dark">
               <li>
                 <ShieldCheck size={15} /> Three fixed packages per service
               </li>
               <li>
-                <Layers size={15} /> Transparent deliverables and exclusions
+                <Layers size={15} /> Clear deliverables and exclusions
               </li>
               <li>
                 <Compass size={15} /> Matched with a specialist after applying
@@ -109,8 +107,7 @@ export function Introduction() {
               <ArrowUpRight size={16} />
             </a>
             <p className="path-card__note">
-              The assessment is a recommendation, not a restriction. Any service can be
-              purchased, subject to expert review and suitability.
+              The assessment recommends — it never restricts what you can buy.
             </p>
           </article>
         </div>

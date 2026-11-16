@@ -33,19 +33,12 @@ export function About() {
         <div className="about__copy reveal">
           <span className="eyebrow">About the platform</span>
           <h2 className="h2">
-            A Shopify readiness and growth platform — not another agency.
+            A readiness platform. Not another agency.
           </h2>
           <p className="lede">
             Most store owners are told to advertise first and fix later. We built the
-            opposite sequence. Engine assesses what a store is actually ready for,
-            prices the work required to close the gap, and only then connects the
-            business with the specialists who execute it.
-          </p>
-          <p className="about__body">
-            The platform operates on three revenue models: readiness services that
-            build the foundation, Genius Marketing engagements for stores prepared to
-            scale, and continued growth services for ongoing optimisation. Assessment
-            is the entry point — the catalogue is the path.
+            opposite sequence: assess what the store is ready for, price the gap, then
+            connect you with the specialist who closes it.
           </p>
           <button
             className="btn btn--primary"
