@@ -3,11 +3,7 @@ import { useReveal } from './hooks';
 import { Nav } from './components/Nav';
 import { Hero } from './components/Hero';
 import { Introduction } from './components/Introduction';
-import { Stages } from './components/Stages';
-import { HowItWorks } from './components/HowItWorks';
-import { Services } from './components/Services';
-import { Genius } from './components/Genius';
-import { About } from './components/About';
+import { Explore } from './components/Explore';
 import { FinalCta } from './components/FinalCta';
 import { Footer } from './components/Footer';
 import { AssessmentModal } from './components/AssessmentModal';
@@ -77,11 +73,7 @@ export default function App() {
       <main>
         <Hero />
         <Introduction />
-        <Stages />
-        <HowItWorks />
-        <Services />
-        <Genius />
-        <About />
+        <Explore />
         <FinalCta />
       </main>
       <Footer />

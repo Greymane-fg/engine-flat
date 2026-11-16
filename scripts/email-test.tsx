@@ -23,6 +23,8 @@ const EXPECTED = {
 };
 
 const calls: any[] = [];
+/** No real waiting in tests; the rate-limit gap is verified separately. */
+const FAST = { gapMs: 0 };
 let failMode: 'none' | 'user' | 'admin' | 'both' = 'none';
 
 // Stub the module before importing our wrapper.
@@ -98,7 +100,7 @@ try {
 
   failMode = 'none';
   calls.length = 0;
-  let state = await email.sendApplicationEmails(app, undefined, undefined, transport);
+  let state = await email.sendApplicationEmails(app, undefined, undefined, transport, FAST);
   assert(calls.length === 2, 'exactly two emails sent');
   assert(calls.some(c => c.templateId === EXPECTED.admin), 'admin template used');
   assert(calls.some(c => c.templateId === EXPECTED.user), 'user template used');
@@ -106,8 +108,49 @@ try {
   assert(state.complete === true, 'delivery reported complete');
   assert(state.sent.includes('admin') && state.sent.includes('user'), 'both channels recorded sent');
 
+  // EmailJS rate-limits at one request per second. Both templates used to be
+  // fired in the same tick, so the second was throttled and reported as a
+  // failure. These assertions pin the sequential behaviour.
+  assert(
+    calls[0].templateId === EXPECTED.admin,
+    'team notification is sent first',
+  );
+  assert(
+    calls[1].templateId === EXPECTED.user,
+    'merchant confirmation follows, not in parallel',
+  );
+
+  // The gap must actually be awaited between the two sends.
+  {
+    const seen: string[] = [];
+    const order: string[] = [];
+    const gapSpy: number[] = [];
+    const slowTransport = async (_c: any, templateId: string) => {
+      seen.push(templateId);
+    };
+    const state2 = await email.sendApplicationEmails(app, undefined, undefined, slowTransport, {
+      gapMs: 1100,
+      sleep: async (ms: number) => {
+        gapSpy.push(ms);
+        order.push('slept');
+      },
+    });
+    assert(gapSpy.length === 1 && gapSpy[0] === 1100, 'waits 1.1s between sends for the rate limit');
+    assert(order.length === 1, 'the gap is awaited exactly once');
+    assert(state2.sent.length === 2, 'both sends still complete after the gap');
+  }
+
   const adminVars = calls.find(c => c.templateId === EXPECTED.admin).params;
   const userVars = calls.find(c => c.templateId === EXPECTED.user).params;
+  assert(adminVars.submission_label !== undefined, 'submission_label supplied for the templates');
+  assert(
+    typeof adminVars.payment_note === 'string' && adminVars.payment_note.length > 0,
+    'payment_note always present so no label renders empty',
+  );
+  assert(
+    /no payment has been taken/i.test(adminVars.payment_note),
+    'payment_note states that nothing has been charged',
+  );
   assert(EMAIL_CONFIG_PUBLIC_KEY === EXPECTED.publicKey, 'public key matches the shipped key');
   assert(adminVars.reference === app.reference, 'reference passed through');
   assert(/ENG-\d{4}-\d{4}/.test(adminVars.reference), 'reference format sequential');
@@ -126,7 +169,7 @@ try {
   console.log('\n--- merchant template fails ---');
   failMode = 'user';
   calls.length = 0;
-  state = await email.sendApplicationEmails(app, undefined, undefined, transport);
+  state = await email.sendApplicationEmails(app, undefined, undefined, transport, FAST);
   assert(calls.length === 2, 'both still attempted');
   assert(state.sent.includes('admin'), 'team still notified when merchant email fails');
   assert(state.failed.length === 1 && state.failed[0].channel === 'user', 'failure attributed to merchant channel');
@@ -137,7 +180,7 @@ try {
   console.log('\n--- team template fails ---');
   failMode = 'admin';
   calls.length = 0;
-  state = await email.sendApplicationEmails(app, undefined, undefined, transport);
+  state = await email.sendApplicationEmails(app, undefined, undefined, transport, FAST);
   assert(state.failed.some(f => f.channel === 'admin'), 'admin failure recorded');
   summary = email.summariseDelivery(state);
   assert(summary.tone === 'manual', 'UI falls back to manual confirmation');
@@ -145,7 +188,7 @@ try {
 
   console.log('\n--- total failure ---');
   failMode = 'both';
-  state = await email.sendApplicationEmails(app, undefined, undefined, transport);
+  state = await email.sendApplicationEmails(app, undefined, undefined, transport, FAST);
   assert(state.sent.length === 0 && state.failed.length === 2, 'both failures recorded');
   assert(!state.complete, 'never claims success');
 
@@ -162,7 +205,7 @@ try {
   }, []);
   failMode = 'none';
   calls.length = 0;
-  state = await email.sendApplicationEmails(assessment, report, undefined, transport);
+  state = await email.sendApplicationEmails(assessment, report, undefined, transport, FAST);
   const rVars = calls.find(c => c.templateId === EXPECTED.admin).params;
   assert(rVars.has_report === 'true', 'report flag set for assessments');
   assert(rVars.readiness_score === `${report.overall}%`, 'readiness score included');

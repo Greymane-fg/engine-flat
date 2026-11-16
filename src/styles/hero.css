@@ -38,71 +38,16 @@
   }
 }
 
+/* A single flat tint rather than stacked ramps. The photograph already has
+   its own falloff to darkness; piling gradients on it was doing nothing. */
 .hero__veil {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(100deg, rgba(23, 19, 31, 0.95) 0%, rgba(23, 19, 31, 0.72) 34%, rgba(23, 19, 31, 0.12) 62%, rgba(23, 19, 31, 0.4) 100%),
-    linear-gradient(180deg, rgba(23, 19, 31, 0.72) 0%, transparent 26%, transparent 62%, rgba(23, 19, 31, 0.92) 100%);
+  background: rgba(16, 43, 42, 0.62);
 }
 
-.hero__aurora {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(90px);
-  mix-blend-mode: screen;
-  opacity: 0.55;
-  pointer-events: none;
-}
-
-.hero__aurora--a {
-  width: 46vw;
-  height: 46vw;
-  left: -8vw;
-  bottom: -14vw;
-  background: radial-gradient(circle, rgba(103, 65, 200, 0.85), transparent 66%);
-  animation: auroraA 22s ease-in-out infinite alternate;
-}
-
-.hero__aurora--b {
-  width: 32vw;
-  height: 32vw;
-  right: 8vw;
-  top: -6vw;
-  background: radial-gradient(circle, rgba(185, 165, 237, 0.55), transparent 68%);
-  animation: auroraB 28s ease-in-out infinite alternate;
-}
-
-@keyframes auroraA {
-  from { transform: translate3d(0, 0, 0) scale(1); }
-  to { transform: translate3d(6%, -8%, 0) scale(1.18); }
-}
-
-@keyframes auroraB {
-  from { transform: translate3d(0, 0, 0) scale(1.05); }
-  to { transform: translate3d(-8%, 10%, 0) scale(0.92); }
-}
-
-.hero__grid {
-  position: absolute;
-  inset: auto 0 0 0;
-  height: 46%;
-  background-image:
-    linear-gradient(rgba(185, 165, 237, 0.14) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(185, 165, 237, 0.14) 1px, transparent 1px);
-  background-size: 78px 78px;
-  mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.55), transparent 78%);
-  -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.55), transparent 78%);
-  transform: perspective(520px) rotateX(66deg) translateY(28%);
-  transform-origin: bottom center;
-  opacity: 0.6;
-  animation: gridShift 26s linear infinite;
-}
-
-@keyframes gridShift {
-  from { background-position: 0 0, 0 0; }
-  to { background-position: 0 78px, 0 0; }
-}
+/* The two aurora blobs are gone. They were soft purple glows doing no
+   informational work, and this palette is meant to be calm. */
 
 .hero__particles {
   position: absolute;
@@ -118,8 +63,8 @@
   width: var(--s);
   height: var(--s);
   border-radius: 50%;
-  background: rgba(217, 243, 106, 0.9);
-  box-shadow: 0 0 10px rgba(217, 243, 106, 0.6);
+  background: rgba(255, 128, 107, 0.9);
+  box-shadow: 0 0 10px rgba(255, 128, 107, 0.6);
   opacity: var(--o);
   animation: particleRise var(--d) linear var(--delay) infinite;
 }
@@ -159,8 +104,8 @@
   letter-spacing: -0.045em;
   font-weight: 700;
   max-width: 16ch;
-  color: #fdfcff;
-  text-shadow: 0 24px 60px rgba(10, 6, 20, 0.55);
+  color: var(--mist);
+  text-shadow: 0 24px 60px rgba(11, 31, 30, 0.55);
 }
 
 .hero__headline span {
@@ -175,12 +120,7 @@
 }
 
 .hero__headline-accent {
-  background: linear-gradient(96deg, #ffffff 0%, #e5dbff 38%, var(--chartreuse) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  text-shadow: none;
-  padding-bottom: 0.06em;
+  color: var(--sage);
 }
 
 @keyframes heroIn {
@@ -202,12 +142,12 @@
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  color: rgba(247, 244, 251, 0.6);
+  color: rgba(233, 237, 230, 0.6);
   transition: color var(--dur) var(--ease);
 }
 
 .hero__scroll:hover {
-  color: var(--chartreuse);
+  color: var(--sage);
 }
 
 .hero__scroll-text {
@@ -223,7 +163,7 @@
   width: 1px;
   height: 40px;
   overflow: hidden;
-  background: rgba(247, 244, 251, 0.16);
+  background: rgba(233, 237, 230, 0.16);
 }
 
 .hero__scroll-line span {
@@ -231,7 +171,7 @@
   inset-inline: 0;
   top: -40px;
   height: 40px;
-  background: linear-gradient(to bottom, transparent, var(--chartreuse));
+  background: var(--coral);
   animation: scrollTrace 2.6s var(--ease-in-out) infinite;
 }
 
@@ -257,8 +197,7 @@
     object-position: 74% 40%;
   }
   .hero__veil {
-    background:
-      linear-gradient(180deg, rgba(23, 19, 31, 0.85) 0%, rgba(23, 19, 31, 0.4) 32%, rgba(23, 19, 31, 0.6) 66%, rgba(23, 19, 31, 0.96) 100%);
+    background: rgba(16, 43, 42, 0.7);
   }
   .hero__headline {
     max-width: 13ch;

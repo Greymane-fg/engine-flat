@@ -42,12 +42,11 @@ export function Footer() {
 
           <div className="footer__col">
             <h4>Navigate</h4>
-            <a href="#how-it-works">How It Works</a>
-            <a href="#stages">Readiness Stages</a>
-            <a href="#services">Services</a>
-            <a href="#genius">Genius Marketing</a>
-            <a href="#about">About</a>
-            <button onClick={() => openModal({ kind: 'track' })}>Track Application</button>
+            <a href="#introduction">Start here</a>
+            <a href="#explore">What we do</a>
+            <a href="#contact">Get started</a>
+            <button onClick={() => openModal({ kind: 'assessment' })}>Assess my store</button>
+            <button onClick={() => openModal({ kind: 'track' })}>Track application</button>
           </div>
 
           <div className="footer__col">

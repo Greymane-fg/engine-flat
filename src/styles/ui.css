@@ -32,7 +32,7 @@
   width: 100%;
   padding: 13px 15px;
   border-radius: var(--r-sm);
-  border: 1px solid rgba(23, 21, 27, 0.14);
+  border: 1px solid rgba(11, 31, 30, 0.14);
   background: #fff;
   color: var(--ink);
   font-size: 14.5px;
@@ -73,13 +73,13 @@
 
 .field input::placeholder,
 .field textarea::placeholder {
-  color: rgba(23, 21, 27, 0.32);
+  color: rgba(11, 31, 30, 0.32);
 }
 
 .field input:hover,
 .field select:hover,
 .field textarea:hover {
-  border-color: rgba(23, 21, 27, 0.26);
+  border-color: rgba(11, 31, 30, 0.26);
 }
 
 .field input:focus,
@@ -87,7 +87,7 @@
 .field textarea:focus {
   outline: none;
   border-color: var(--royal);
-  box-shadow: 0 0 0 3px rgba(103, 65, 200, 0.14);
+  box-shadow: 0 0 0 3px rgba(32, 86, 83, 0.14);
 }
 
 .field__hint {
@@ -99,14 +99,14 @@
 .field__error {
   font-size: 12px;
   font-weight: 500;
-  color: #b4262f;
+  color: #a8282f;
 }
 
 .field--error input,
 .field--error select,
 .field--error textarea {
   border-color: #d9535b;
-  background: #fff7f7;
+  background: #fdf3f3;
 }
 
 .form-grid {
@@ -132,8 +132,8 @@
 
 .status {
   --status-ink: var(--ink-soft);
-  --status-bg: rgba(23, 21, 27, 0.06);
-  --status-line: rgba(23, 21, 27, 0.1);
+  --status-bg: rgba(11, 31, 30, 0.06);
+  --status-line: rgba(11, 31, 30, 0.1);
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -159,33 +159,33 @@
 }
 
 .status--passed {
-  --status-ink: #1f7a4d;
-  --status-bg: rgba(31, 122, 77, 0.08);
-  --status-line: rgba(31, 122, 77, 0.2);
+  --status-ink: #1c6b4a;
+  --status-bg: rgba(28, 107, 74, 0.09);
+  --status-line: rgba(28, 107, 74, 0.24);
 }
 
 .status--needs-attention {
-  --status-ink: #9a6a00;
-  --status-bg: rgba(214, 152, 0, 0.1);
-  --status-line: rgba(214, 152, 0, 0.24);
+  --status-ink: #8a6300;
+  --status-bg: rgba(180, 130, 20, 0.1);
+  --status-line: rgba(180, 130, 20, 0.26);
 }
 
 .status--not-ready {
-  --status-ink: #b4262f;
-  --status-bg: rgba(180, 38, 47, 0.075);
-  --status-line: rgba(180, 38, 47, 0.2);
+  --status-ink: #a8282f;
+  --status-bg: rgba(168, 40, 47, 0.08);
+  --status-line: rgba(168, 40, 47, 0.22);
 }
 
 .status--not-validated {
-  --status-ink: #5b4a86;
-  --status-bg: rgba(103, 65, 200, 0.08);
-  --status-line: rgba(103, 65, 200, 0.2);
+  --status-ink: var(--pine);
+  --status-bg: rgba(32, 86, 83, 0.08);
+  --status-line: rgba(32, 86, 83, 0.22);
 }
 
 .status--not-yet-eligible {
   --status-ink: var(--ink-muted);
-  --status-bg: rgba(23, 21, 27, 0.05);
-  --status-line: rgba(23, 21, 27, 0.1);
+  --status-bg: rgba(11, 31, 30, 0.05);
+  --status-line: rgba(11, 31, 30, 0.1);
 }
 
 .status--dark {
@@ -207,7 +207,7 @@
 
 .ring__track {
   fill: none;
-  stroke: rgba(23, 21, 27, 0.09);
+  stroke: rgba(11, 31, 30, 0.09);
 }
 
 .ring__value {
@@ -254,7 +254,7 @@
 }
 
 .ring--on-dark .ring__track {
-  stroke: rgba(255, 255, 255, 0.14);
+  stroke: rgba(233, 237, 230, 0.14);
 }
 
 .ring--on-dark .ring__label strong {
@@ -276,7 +276,7 @@
 }
 
 .stage-num--premium {
-  color: #8a6b00;
+  color: var(--ink-muted);
 }
 
 .divider {
@@ -302,8 +302,8 @@
   gap: 10px;
   padding: 13px 20px;
   border-radius: var(--r-pill);
-  background: rgba(23, 19, 31, 0.94);
-  border: 1px solid rgba(217, 243, 106, 0.32);
+  background: rgba(16, 43, 42, 0.94);
+  border: 1px solid rgba(255, 128, 107, 0.32);
   backdrop-filter: blur(18px);
   color: var(--on-dark);
   font-size: 13.5px;

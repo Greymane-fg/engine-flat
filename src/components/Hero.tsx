@@ -42,11 +42,7 @@ export function Hero() {
           decoding="async"
         />
         <div className="hero__veil" />
-        <div className="hero__aurora hero__aurora--a" />
-        <div className="hero__aurora hero__aurora--b" />
-        <div className="hero__grid" />
         <div className="hero__particles" ref={particles} />
-        <div className="grain" />
       </div>
 
       <div className="hero__content shell">

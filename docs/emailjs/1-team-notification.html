@@ -4,164 +4,91 @@
   ===========================================================================
   EmailJS template ID: template_2awtneq
 
-  Settings
-    To email:    your own address (e.g. readiness@engine.studio)
-    Reply-To:    {{reply_to}}      ← so replying answers the merchant directly
-    Subject:     New {{submission_type}} — {{reference}} — {{store_url}}
+  SETTINGS (paste these into the template's Settings tab)
+    To email:    your own address, e.g. readiness@engine.studio
+    Reply-To:    {{reply_to}}
+    Subject:     {{submission_label}} — {{reference}}
     From name:   {{brand_name}}
 
-  Covers both form types. Package applications show pricing; readiness
-  assessments show the report. Sections vanish when their data is absent.
+  IMPORTANT — why the last version failed:
+    It used {{#if variable}} ... {{/if}}. EmailJS does not support that
+    syntax. It uses {{#variable}} ... {{/variable}} for "show if truthy".
+
+  HOW THIS TEMPLATE STAYS SAFE
+    * Only two conditional blocks, both closed correctly.
+    * Every optional value arrives as a ready-made string from the app
+      (including "Not provided"), so nothing renders as a dangling label.
+    * No loops, no nested conditionals, no HTML entities inside variables.
   ===========================================================================
 -->
-<div style="margin:0;padding:24px 12px;background:#f0ecf8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
-  <div style="max-width:640px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e4ddf2;">
+<div style="margin:0;padding:24px 12px;background:#E9EDE6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+  <div style="max-width:620px;margin:0 auto;background:#ffffff;border:1px solid #A9C5BD;border-radius:10px;overflow:hidden;">
 
-    <!-- Header -->
-    <div style="background:#17131f;padding:26px 28px;">
-      <div style="display:inline-block;padding:5px 11px;border-radius:999px;background:rgba(217,243,106,0.16);border:1px solid rgba(217,243,106,0.4);color:#d9f36a;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;">
-        New submission
+    <div style="background:#102B2A;padding:22px 26px;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#FF806B;">
+        {{submission_label}}
       </div>
-      <h1 style="margin:14px 0 4px;font-size:22px;line-height:1.2;color:#ffffff;font-weight:700;">
-        {{submission_type}}
-      </h1>
-      <p style="margin:0;font-size:13px;color:rgba(247,244,251,0.6);">
-        {{reference}} &nbsp;·&nbsp; {{submitted_at}}
-      </p>
+      <div style="margin-top:8px;font-size:18px;font-weight:700;color:#E9EDE6;">
+        {{reference}}
+      </div>
+      <div style="margin-top:4px;font-size:12px;color:#A9C5BD;">
+        {{store_url}} &nbsp;·&nbsp; {{submitted_at}}
+      </div>
     </div>
 
-    <div style="padding:26px 28px;">
+    <div style="padding:24px 26px;">
 
-      <!-- Headline total -->
-      <table role="presentation" width="100%" style="border-collapse:collapse;margin-bottom:22px;">
-        <tr>
-          <td style="padding:16px 18px;background:#f6f3f8;border-radius:12px;border:1px solid #e4ddf2;">
-            <div style="font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#6d6679;margin-bottom:4px;">
-              Total expected payment
-            </div>
-            <div style="font-size:26px;font-weight:700;color:#17151b;letter-spacing:-0.02em;">
-              {{total_payment}}
-            </div>
-            {{#if ad_budget_line}}
-            <div style="font-size:11.5px;color:#6d6679;margin-top:4px;">{{ad_budget_line}}</div>
-            {{/if}}
-          </td>
-        </tr>
+      <div style="padding:14px 16px;background:#E9EDE6;border-radius:8px;margin-bottom:20px;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#205653;">
+          Total expected payment
+        </div>
+        <div style="margin-top:3px;font-size:22px;font-weight:700;color:#102B2A;">
+          {{total_payment}}
+        </div>
+        <div style="margin-top:3px;font-size:12px;color:#5D736E;">
+          {{payment_note}}
+        </div>
+      </div>
+
+      <table role="presentation" width="100%" style="border-collapse:collapse;font-size:13px;line-height:1.6;color:#102B2A;">
+        <tr><td style="padding:5px 0;width:120px;color:#5D736E;">Name</td><td style="padding:5px 0;font-weight:600;">{{customer_name}}</td></tr>
+        <tr><td style="padding:5px 0;color:#5D736E;">Email</td><td style="padding:5px 0;"><a href="mailto:{{customer_email}}" style="color:#205653;">{{customer_email}}</a></td></tr>
+        <tr><td style="padding:5px 0;color:#5D736E;">WhatsApp</td><td style="padding:5px 0;">{{customer_whatsapp}}</td></tr>
+        <tr><td style="padding:5px 0;color:#5D736E;">Store</td><td style="padding:5px 0;"><a href="{{store_url}}" style="color:#205653;">{{store_url}}</a></td></tr>
+        <tr><td style="padding:5px 0;color:#5D736E;">Category</td><td style="padding:5px 0;">{{business_category}}</td></tr>
+        <tr><td style="padding:5px 0;color:#5D736E;">Service</td><td style="padding:5px 0;">{{service}}</td></tr>
+        <tr><td style="padding:5px 0;color:#5D736E;">Package</td><td style="padding:5px 0;">{{package_name}}</td></tr>
+        <tr><td style="padding:5px 0;color:#5D736E;">Service fee</td><td style="padding:5px 0;">{{service_fee}}</td></tr>
+        <tr><td style="padding:5px 0;color:#5D736E;">Ad budget</td><td style="padding:5px 0;">{{advertising_budget}}</td></tr>
       </table>
 
-      <!-- Merchant -->
-      <h2 style="margin:0 0 10px;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#6741c8;">
-        Merchant
-      </h2>
-      <table role="presentation" width="100%" style="border-collapse:collapse;font-size:13.5px;line-height:1.6;color:#17151b;">
-        <tr>
-          <td style="padding:6px 0;width:132px;color:#6d6679;">Name</td>
-          <td style="padding:6px 0;font-weight:600;">{{customer_name}}</td>
-        </tr>
-        <tr>
-          <td style="padding:6px 0;color:#6d6679;">Email</td>
-          <td style="padding:6px 0;"><a href="mailto:{{customer_email}}" style="color:#6741c8;text-decoration:none;">{{customer_email}}</a></td>
-        </tr>
-        <tr>
-          <td style="padding:6px 0;color:#6d6679;">WhatsApp</td>
-          <td style="padding:6px 0;"><a href="https://wa.me/{{customer_whatsapp}}" style="color:#6741c8;text-decoration:none;">{{customer_whatsapp}}</a></td>
-        </tr>
-        <tr>
-          <td style="padding:6px 0;color:#6d6679;">Store</td>
-          <td style="padding:6px 0;"><a href="{{store_url}}" style="color:#6741c8;text-decoration:none;">{{store_url}}</a></td>
-        </tr>
-        <tr>
-          <td style="padding:6px 0;color:#6d6679;">Category</td>
-          <td style="padding:6px 0;">{{business_category}}</td>
-        </tr>
-        {{#if objective}}
-        <tr>
-          <td style="padding:6px 0;color:#6d6679;">Objective</td>
-          <td style="padding:6px 0;">{{objective}}</td>
-        </tr>
-        {{/if}}
-      </table>
+      {{#requirements}}
+      <div style="height:1px;background:#E9EDE6;margin:20px 0;"></div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#205653;margin-bottom:6px;">Requirements</div>
+      <div style="font-size:13px;line-height:1.65;color:#102B2A;white-space:pre-line;">{{requirements}}</div>
+      {{/requirements}}
 
-      <!-- Commercial (package applications only) -->
-      {{#if package_name}}
-      <div style="height:1px;background:#ede8f6;margin:22px 0;"></div>
-      <h2 style="margin:0 0 10px;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#6741c8;">
-        Commercial
-      </h2>
-      <table role="presentation" width="100%" style="border-collapse:collapse;font-size:13.5px;line-height:1.6;color:#17151b;">
-        <tr>
-          <td style="padding:6px 0;width:132px;color:#6d6679;">Service</td>
-          <td style="padding:6px 0;font-weight:600;">{{service}}</td>
-        </tr>
-        <tr>
-          <td style="padding:6px 0;color:#6d6679;">Package</td>
-          <td style="padding:6px 0;">{{package_name}}</td>
-        </tr>
-        <tr>
-          <td style="padding:6px 0;color:#6d6679;">Service fee</td>
-          <td style="padding:6px 0;">{{service_fee}}</td>
-        </tr>
-        <tr>
-          <td style="padding:6px 0;color:#6d6679;">Ad budget</td>
-          <td style="padding:6px 0;">{{advertising_budget}}</td>
-        </tr>
-      </table>
-      {{/if}}
+      {{#additional_info}}
+      <div style="height:1px;background:#E9EDE6;margin:20px 0;"></div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#205653;margin-bottom:6px;">Additional information</div>
+      <div style="font-size:13px;line-height:1.65;color:#102B2A;white-space:pre-line;">{{additional_info}}</div>
+      {{/additional_info}}
 
-      <!-- Requirements -->
-      {{#if requirements}}
-      <div style="height:1px;background:#ede8f6;margin:22px 0;"></div>
-      <h2 style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#6741c8;">
-        Requirements
-      </h2>
-      <p style="margin:0 0 12px;font-size:13.5px;line-height:1.65;color:#3d3a45;white-space:pre-line;">{{requirements}}</p>
-      {{/if}}
+      {{#has_report}}
+      <div style="height:1px;background:#E9EDE6;margin:20px 0;"></div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#205653;margin-bottom:6px;">Readiness report</div>
+      <div style="font-size:15px;font-weight:700;color:#102B2A;">{{readiness_score}}</div>
+      <div style="font-size:12px;color:#5D736E;margin-bottom:8px;">{{current_stage}}</div>
+      <div style="padding:12px 14px;background:#102B2A;border-radius:8px;font-family:ui-monospace,Menlo,monospace;font-size:11px;line-height:1.6;color:#E9EDE6;white-space:pre-wrap;">{{report_summary}}</div>
+      {{/has_report}}
 
-      {{#if additional_info}}
-      <h2 style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#6741c8;">
-        Additional information
-      </h2>
-      <p style="margin:0 0 12px;font-size:13.5px;line-height:1.65;color:#3d3a45;white-space:pre-line;">{{additional_info}}</p>
-      {{/if}}
-
-      <!-- Readiness report (assessments only) -->
-      {{#if has_report}}
-      <div style="height:1px;background:#ede8f6;margin:22px 0;"></div>
-      <h2 style="margin:0 0 10px;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#6741c8;">
-        Readiness report
-      </h2>
-      <table role="presentation" width="100%" style="border-collapse:collapse;margin-bottom:14px;">
-        <tr>
-          <td style="padding:14px 16px;background:#f6f3f8;border-radius:12px;border:1px solid #e4ddf2;width:50%;">
-            <div style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#6d6679;">Score</div>
-            <div style="font-size:24px;font-weight:700;color:#6741c8;">{{readiness_score}}</div>
-          </td>
-          <td style="width:12px;"></td>
-          <td style="padding:14px 16px;background:#f6f3f8;border-radius:12px;border:1px solid #e4ddf2;width:50%;">
-            <div style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#6d6679;">Stage</div>
-            <div style="font-size:13px;font-weight:600;color:#17151b;line-height:1.3;margin-top:4px;">{{current_stage}}</div>
-          </td>
-        </tr>
-      </table>
-      <pre style="margin:0;padding:16px;background:#17131f;color:#e9e2f7;border-radius:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word;">{{report_summary}}</pre>
-      {{/if}}
-
-      <!-- Reply prompt -->
-      <table role="presentation" width="100%" style="border-collapse:collapse;margin-top:24px;">
-        <tr>
-          <td style="padding:14px 16px;background:rgba(103,65,200,0.06);border-radius:12px;border:1px solid rgba(103,65,200,0.16);font-size:12.5px;line-height:1.6;color:#4a4457;">
-            Replying to this email answers the merchant directly
-            (<strong style="color:#17151b;">{{reply_to}}</strong>).
-          </td>
-        </tr>
-      </table>
-
+      <div style="margin-top:22px;padding:12px 14px;background:#E9EDE6;border-radius:8px;font-size:12px;line-height:1.6;color:#3A514D;">
+        Reply to this email to answer <strong>{{customer_email}}</strong> directly.
+      </div>
     </div>
 
-    <!-- Footer -->
-    <div style="padding:18px 28px;background:#f6f3f8;border-top:1px solid #ede8f6;font-size:11px;line-height:1.6;color:#8d879a;">
-      {{brand_name}} · {{brand_email}} · {{support_hours}}<br>
-      Internal notification · © {{year}}
+    <div style="padding:14px 26px;background:#E9EDE6;border-top:1px solid #A9C5BD;font-size:11px;color:#5D736E;">
+      {{brand_name}} · {{brand_email}} · {{support_hours}}
     </div>
   </div>
 </div>
