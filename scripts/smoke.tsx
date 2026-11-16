@@ -163,6 +163,45 @@ try {
   assert(det.open, 'exclusions expand on click');
   await click(document.querySelector('.modal__close')!);
 
+  // 5d. Mobile plan switcher: all tiers reachable from one bar
+  await click(sfRow.querySelector('button'));
+  const switchTabs = document.querySelectorAll('.pkg-switch button');
+  assert(switchTabs.length === 3, 'tier switcher exposes all three plans');
+  const switchText = switchTabs[0].textContent ?? '';
+  assert(/Basic/i.test(switchText) && /\$300/.test(switchText), 'switcher tab shows tier and price');
+  const cells = () => document.querySelectorAll('.pkg-cell');
+  assert(cells().length === 3, 'all three cards stay in the DOM');
+  const activeTab = Array.from(switchTabs).find((t) => t.getAttribute('aria-pressed') === 'true');
+  assert(
+    Array.from(switchTabs).filter((t) => t.getAttribute('aria-pressed') === 'true').length === 1,
+    'exactly one tier presented as current',
+  );
+  assert(
+    /Standard/i.test(activeTab!.textContent ?? ''),
+    'opens on the recommended tier rather than always the cheapest',
+  );
+  await click(switchTabs[2]);
+  assert(cells()[2].classList.contains('is-active'), 'switching tier activates its card');
+  assert(!cells()[0].classList.contains('is-active'), 'previous tier card stands down');
+  // The chosen card's CTA must still open the application for that exact tier.
+  const activeCard = cells()[2].querySelector('.pkg') as HTMLElement;
+  assert(/Premium/.test(activeCard.textContent ?? ''), 'active card is the premium tier');
+  await click(activeCard.querySelector('.pkg__cta'));
+  assert(/Apply for Premium/.test(text()), 'switcher CTA applies the shown tier');
+  await click(document.querySelector('.modal__close')!);
+  await click(document.querySelector('.modal__close') ?? document.body);
+  assert(document.querySelectorAll('.pkg').length === 0, 'modal fully closed after switcher test');
+
+  // 5e. Scope disclosure replaces the header wall on narrow screens
+  await click(sfRow.querySelector('button'));
+  const scope = document.querySelector('.svc-modal__scope') as HTMLDetailsElement;
+  assert(scope !== null, 'service header has a collapsible scope list');
+  assert(!scope.open, 'scope list is collapsed by default');
+  assert(scope.querySelectorAll('li').length === 5, 'scope entries retained in the DOM');
+  await click(scope.querySelector('summary'));
+  assert(scope.open, 'scope list expands on click');
+  await click(document.querySelector('.modal__close')!);
+
   // 6. Policy modal
   const legalBtn = byText('.footer__legal-links button', /Privacy Policy/);
   await click(legalBtn);

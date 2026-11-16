@@ -18,7 +18,7 @@ import { sendApplicationEmails, summariseDelivery, type DeliveryState, EMPTY_DEL
 import { money, currencyCode, whatsappLink } from '../lib/utils';
 import { BUSINESS_CATEGORIES } from '../lib/assess';
 import { SITE } from '../config';
-import type { PackageTier, Service, ServiceId } from '../types';
+import type { PackageTier, Pkg, Service, ServiceId } from '../types';
 
 type Step = 'compare' | 'apply' | 'review' | 'done';
 
@@ -171,28 +171,7 @@ export function ServiceModal({
           ))}
         </div>
 
-        <div className="svc-modal__head">
-          <div className="svc-modal__intro">
-            <span className={`chip ${service.premium ? 'chip--chartreuse' : 'chip--dark'}`}>
-              Stage {service.code}
-              {service.premium ? ' · Premium offering' : ''}
-            </span>
-            <h2 className="modal__title" style={{ marginTop: 12 }}>
-              {service.title}
-            </h2>
-            <p className="modal__sub" style={{ marginTop: 10 }}>
-              {service.summary}
-            </p>
-          </div>
-          <ul className="svc-modal__areas">
-            {service.areas.map((a) => (
-              <li key={a}>
-                <Check size={12} />
-                {a}
-              </li>
-            ))}
-          </ul>
-        </div>
+        <ServiceHead service={service} />
       </div>
 
       {step === 'compare' && (
@@ -208,102 +187,15 @@ export function ServiceModal({
                 </span>
               </div>
             )}
-            <div className="pkg-grid">
-              {service.packages.map((p) => {
-                const isSel = p.id === selectedId;
-                return (
-                  <article
-                    key={p.id}
-                    className={`pkg ${isSel ? 'pkg--selected' : ''} ${
-                      p.featured ? 'pkg--featured' : ''
-                    } ${service.premium ? 'pkg--premium' : ''}`}
-                  >
-                    {p.featured && (
-                      <span className="pkg__flag">
-                        <Sparkles size={11} /> Recommended
-                      </span>
-                    )}
-                    <header className="pkg__head">
-                      <span className="pkg__tier">{p.tier}</span>
-                      <h3 className="pkg__name">{p.name}</h3>
-                      <div className="pkg__price">
-                        {p.price === null ? (
-                          <em>To be confirmed</em>
-                        ) : (
-                          <>
-                            <strong>{money(p.price)}</strong>
-                            <span>
-                              {currencyCode()}
-                              {service.adBudget ? ' · service fee' : ''}
-                            </span>
-                          </>
-                        )}
-                      </div>
-                      <p className="pkg__blurb">{p.blurb}</p>
-                    </header>
-
-                    <div className="pkg__meta">
-                      <span>
-                        <Clock size={12} />
-                        {p.turnaround}
-                      </span>
-                      <span>
-                        <FileText size={12} />
-                        {p.revisions}
-                      </span>
-                    </div>
-
-                    <div className="pkg__section">
-                      <h4>Deliverables</h4>
-                      <ul className="pkg__list">
-                        {p.deliverables.map((d) => (
-                          <li key={d}>
-                            <Check size={12} strokeWidth={2.8} />
-                            {d}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* Exclusions are due diligence, not decision-making.
-                        Collapsed by default so the card reads as a price and a
-                        promise; still one click away, and fully in the DOM for
-                        anyone who wants to check what is not included. */}
-                    <details className="pkg__section pkg__section--excl pkg__details">
-                      <summary>
-                        <span>
-                          Not included
-                          <em>{p.exclusions.length} exclusions</em>
-                        </span>
-                        <ChevronDown size={13} aria-hidden="true" />
-                      </summary>
-                      <ul className="pkg__list pkg__list--excl">
-                        {p.exclusions.map((d) => (
-                          <li key={d}>
-                            <Minus size={12} />
-                            {d}
-                          </li>
-                        ))}
-                      </ul>
-                    </details>
-
-                    <button
-                      className={`btn ${
-                        isSel ? 'btn--primary' : p.featured ? 'btn--violet' : 'btn--glass'
-                      } btn--block pkg__cta`}
-                      disabled={paused}
-                      onClick={() => {
-                        setSelectedId(p.id);
-                        setStep('apply');
-                      }}
-                    >
-                      {paused ? 'Applications paused' : isSel ? 'Select Package' : `Choose ${p.tier}`}
-                      {!paused && <ArrowRight size={15} className="arrow" />}
-                    </button>
-                  </article>
-                );
-              })}
-            </div>
+            <PackagePlans
+              service={service}
+              selectedId={selectedId}
+              paused={paused}
+              onSelect={(id) => {
+                setSelectedId(id);
+                setStep('apply');
+              }}
+            />
 
             {service.adBudget ? (
               <div className="adbudget-note">
@@ -709,3 +601,211 @@ function TrackButton() {
 }
 
 export type { Service as _Service };
+
+/* --------------------------------------------------------------------------
+   Service head
+   On desktop this is the two-column intro used throughout the site. On a
+   phone the description and scope list are reference material, not the
+   decision — they collapse into one tap so the plans keep the screen.
+   -------------------------------------------------------------------------- */
+
+function ServiceHead({ service }: { service: Service }) {
+  return (
+    <div className="svc-modal__head">
+      <div className="svc-modal__intro">
+        <span className={`chip ${service.premium ? 'chip--chartreuse' : 'chip--dark'}`}>
+          Stage {service.code}
+          {service.premium ? ' · Premium offering' : ''}
+        </span>
+        <h2 className="modal__title" style={{ marginTop: 12 }}>
+          {service.title}
+        </h2>
+        <p className="modal__sub svc-modal__summary" style={{ marginTop: 10 }}>
+          {service.summary}
+        </p>
+
+        <details className="svc-modal__scope">
+          <summary>
+            <span>About this stage</span>
+            <ChevronDown size={14} aria-hidden="true" />
+          </summary>
+          <ul className="svc-modal__areas">
+            {service.areas.map((a) => (
+              <li key={a}>
+                <Check size={12} />
+                {a}
+              </li>
+            ))}
+          </ul>
+        </details>
+      </div>
+
+      <ul className="svc-modal__areas svc-modal__areas--aside">
+        {service.areas.map((a) => (
+          <li key={a}>
+            <Check size={12} />
+            {a}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/* --------------------------------------------------------------------------
+   Plans
+   Wide screens compare all three cards side by side, which is the right
+   shape for a comparison. On a phone three cards stack into a very long
+   scroll, so the tiers become a switcher: pick a tier, read one card.
+   -------------------------------------------------------------------------- */
+
+function PackagePlans({
+  service,
+  selectedId,
+  paused,
+  onSelect,
+}: {
+  service: Service;
+  selectedId: string;
+  paused: boolean;
+  onSelect: (id: string) => void;
+}) {
+  const [activeId, setActiveId] = useState(selectedId);
+
+  return (
+    <>
+      {/* A toggle set, not a tablist: all three cards stay in the DOM and are
+          visible above this breakpoint, so "tab"/"tabpanel" would be a lie. */}
+      <div className="pkg-switch" role="group" aria-label="Choose a package tier to view">
+        {service.packages.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            aria-pressed={p.id === activeId}
+            className={`pkg-switch__tab ${p.id === activeId ? 'is-active' : ''}`}
+            onClick={() => setActiveId(p.id)}
+          >
+            <span className="pkg-switch__tier">{p.tier}</span>
+            <span className="pkg-switch__price">
+              {p.price === null ? 'On request' : money(p.price)}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <div className="pkg-grid">
+        {service.packages.map((p) => (
+          <div key={p.id} className={`pkg-cell ${p.id === activeId ? 'is-active' : ''}`}>
+            <PackageCard
+              service={service}
+              pkg={p}
+              selected={p.id === selectedId}
+              paused={paused}
+              onSelect={() => onSelect(p.id)}
+            />
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function PackageCard({
+  service,
+  pkg: p,
+  selected,
+  paused,
+  onSelect,
+}: {
+  service: Service;
+  pkg: Pkg;
+  selected: boolean;
+  paused: boolean;
+  onSelect: () => void;
+}) {
+  const isSel = selected;
+  return (
+    <article
+      className={`pkg ${isSel ? 'pkg--selected' : ''} ${p.featured ? 'pkg--featured' : ''} ${
+        service.premium ? 'pkg--premium' : ''
+      }`}
+    >
+      {p.featured && (
+        <span className="pkg__flag">
+          <Sparkles size={11} /> Recommended
+        </span>
+      )}
+      <header className="pkg__head">
+        <span className="pkg__tier">{p.tier}</span>
+        <h3 className="pkg__name">{p.name}</h3>
+        <div className="pkg__price">
+          {p.price === null ? (
+            <em>To be confirmed</em>
+          ) : (
+            <>
+              <strong>{money(p.price)}</strong>
+              <span>
+                {currencyCode()}
+                {service.adBudget ? ' · service fee' : ''}
+              </span>
+            </>
+          )}
+        </div>
+        <p className="pkg__blurb">{p.blurb}</p>
+      </header>
+
+      <div className="pkg__meta">
+        <span>
+          <Clock size={12} />
+          {p.turnaround}
+        </span>
+        <span>
+          <FileText size={12} />
+          {p.revisions}
+        </span>
+      </div>
+
+      <div className="pkg__section">
+        <h4>Deliverables</h4>
+        <ul className="pkg__list">
+          {p.deliverables.map((d) => (
+            <li key={d}>
+              <Check size={12} strokeWidth={2.8} />
+              {d}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Exclusions are due diligence, not decision-making. Collapsed by default
+          so the card reads as a price and a promise; still one click away, and
+          fully in the DOM for anyone who wants to check what is not included. */}
+      <details className="pkg__section pkg__section--excl pkg__details">
+        <summary>
+          <span>
+            Not included
+            <em>{p.exclusions.length} exclusions</em>
+          </span>
+          <ChevronDown size={13} aria-hidden="true" />
+        </summary>
+        <ul className="pkg__list pkg__list--excl">
+          {p.exclusions.map((d) => (
+            <li key={d}>
+              <Minus size={12} />
+              {d}
+            </li>
+          ))}
+        </ul>
+      </details>
+
+      <button
+        className={`btn ${isSel ? 'btn--primary' : p.featured ? 'btn--violet' : 'btn--glass'} btn--block pkg__cta`}
+        disabled={paused}
+        onClick={onSelect}
+      >
+        {paused ? 'Applications paused' : isSel ? 'Select Package' : `Choose ${p.tier}`}
+        {!paused && <ArrowRight size={15} className="arrow" />}
+      </button>
+    </article>
+  );
+}

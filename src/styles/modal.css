@@ -266,15 +266,23 @@
     overflow: hidden;
   }
 
+  /* One scroll surface for the whole dialog.
+     Previously the header was fixed chrome and only the middle pane scrolled.
+     On a short screen a tall header (title + description + scope list) left
+     the content a sliver of viewport to scroll in. Letting the header scroll
+     away hands that space back, and the action bar stays pinned to the bottom
+     so the primary action is never out of reach. */
   .modal {
     border-radius: 0;
     width: 100%;
     margin: 0;
     height: 100svh;
     max-height: 100svh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    display: block;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 
   @supports (height: 100dvh) {
@@ -284,26 +292,101 @@
     }
   }
 
-  .modal__head,
-  .modal__foot {
+  .modal__head {
     flex: 0 0 auto;
+  }
+
+  /* The footer travels with the thumb instead of stealing a third of it. */
+  .modal__foot {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+    flex: 0 0 auto;
+    padding-bottom: max(18px, env(safe-area-inset-bottom));
+    background: rgba(20, 16, 28, 0.94);
+    backdrop-filter: blur(14px) saturate(130%);
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
+  }
+
+  .modal--light .modal__foot {
+    background: rgba(246, 243, 248, 0.95);
   }
 
   .modal__body,
   .modal__body--flush,
   .modal--full .modal__body {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     min-height: 0;
     max-height: none;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    padding-bottom: max(24px, env(safe-area-inset-bottom));
+    overflow: visible;
+    padding-bottom: 8px;
+  }
+
+  /* The dialog scrolls as one column, so the close control is pinned to the
+     viewport corner. It sits at the top and the action bar at the bottom, so
+     the two can never overlap. A solid backdrop keeps it legible when the
+     content passes underneath. */
+  .modal__close {
+    position: fixed;
+    top: max(12px, env(safe-area-inset-top));
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    z-index: 5;
+    background: rgba(30, 24, 42, 0.9);
+    border-color: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .modal--light .modal__close {
+    background: rgba(246, 243, 248, 0.94);
+  }
+
+  /* Keep the title clear of the pinned close button. */
+  .modal__head {
+    padding-right: 58px;
+  }
+
+  /* The console already puts a control in that corner; give it room to sit
+     beside the close button instead of underneath it. */
+  .modal--light .modal__head {
+    padding-right: 64px;
   }
 
   /* The scroll container needs its own scrollbar styling on touch. */
   .modal__body::-webkit-scrollbar {
     width: 0;
+  }
+
+  /* A modal header is a label, not a page. Tighten it so the content below
+     gets the screen instead of competing with the chrome. */
+  .modal__head {
+    padding-top: 20px; /* clear of the pinned close button */
+    padding-bottom: 14px;
+  }
+
+  .modal__title {
+    font-size: 1.32rem;
+  }
+
+  .modal__sub {
+    font-size: 12.8px;
+    line-height: 1.55;
+  }
+
+  /* Step labels are redundant once the numbers are visible on a narrow bar. */
+  .steps__item {
+    font-size: 0;
+    gap: 0;
+  }
+
+  .steps__item i {
+    font-size: 10px;
+  }
+
+  .steps__sep {
+    width: 10px;
   }
 }
 
@@ -503,9 +586,18 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 26px;
   padding: clamp(30px, 5vw, 56px) 0;
   text-align: center;
+}
+
+/* The dialog scrolls as one column on a phone, so a short "scanning" view
+   would otherwise sit at the top of an empty screen. Centre it instead. */
+@media (max-width: 640px) {
+  .scan {
+    min-height: calc(100dvh - 200px);
+  }
 }
 
 .scan__orb {
