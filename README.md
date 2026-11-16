@@ -37,10 +37,13 @@ generic walkthrough in [`docs/emailjs-setup.md`](docs/emailjs-setup.md).
 - Full-screen cinematic hero with one sentence, floating glass navigation, animated
   particle field, and a minimal scroll teaser.
 - Introduction with the two customer paths (assess vs. buy directly).
-- Five readiness stages on a connected progression rail, with stage 05 given a
-  distinctive premium treatment.
-- Five-step process, service catalogue, dark immersive Genius Marketing feature,
-  about section, final conversion block, and a full footer.
+- An **Explore compartment**: four tabs (stages, services & pricing, process,
+  about) with one panel visible at a time. This replaced four stacked sections.
+- Final conversion block and a full footer.
+
+The page is deliberately four sections long. Everything that used to be a
+chapter is now behind a tab, because a visitor arriving cold needed ~1,000
+words before they could decide anything.
 
 **Path A — assessment**
 - URL validation (accepts `store.com` and `store.myshopify.com`, rejects free-mail
@@ -135,14 +138,24 @@ no component reads prices from a hardcoded literal.
 
 ## Design system
 
-Futuristic glassmorphism over a midnight-violet / lavender / electric-chartreuse
-palette. Glass is used deliberately — navigation, hero overlay, stage cards, pricing
-overlays, modals — while content sections keep visual breathing room.
+Five colours, no gradients:
+
+| Token | Hex | Role |
+| --- | --- | --- |
+| forest | `#102B2A` | dark surfaces, text on light |
+| pine | `#205653` | primary action, links |
+| sage | `#A9C5BD` | soft accent, borders |
+| mist | `#E9EDE6` | light surfaces, text on dark |
+| coral | `#FF806B` | accent only — never a large fill |
+
+Surfaces are flat. There is no `linear-gradient` or `radial-gradient` anywhere in
+`src/styles`, which is asserted in review rather than left to memory. Coral is
+reserved for emphasis: a chip, a single accent button, a status dot.
 
 - **Type:** Manrope (display) + Inter (body), self-hosted via Fontsource.
-- **Dark / light alternation:** midnight, warm white and aubergine sections.
-- **Motion:** restrained. Scroll reveals, soft card elevation, ambient hero drift,
-  animated readiness bars. All of it respects `prefers-reduced-motion`.
+- **Dark / light alternation:** forest and mist sections, no gradients between.
+- **Motion:** restrained. Scroll reveals and panel fades only. All of it respects
+  `prefers-reduced-motion`.
 
 ## Accessibility notes
 

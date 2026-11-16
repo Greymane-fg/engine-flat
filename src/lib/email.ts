@@ -228,7 +228,10 @@ export function buildVariables(
 
     /* Identity ------------------------------------------------------ */
     reference: app.reference,
+    // `submission_type` is kept for older templates; `submission_label` is the
+    // one the current templates use.
     submission_type: kind,
+    submission_label: kind,
     submitted_at: formatDateTime(app.createdAt),
 
     /* Merchant ------------------------------------------------------ */
@@ -248,6 +251,13 @@ export function buildVariables(
       app.total === null
         ? 'Quoted after review'
         : money(app.total),
+    // Always present, so the template never has a label with nothing after it.
+    payment_note:
+      app.total === null
+        ? 'Final price is confirmed after discovery. No payment has been taken.'
+        : app.adBudget
+          ? `${money(app.adBudget)} of this is advertising budget, held separately. No payment has been taken.`
+          : 'No payment has been taken yet.',
     // Ready-made sentence so templates stay simple.
     ad_budget_line: adBudgetLine,
 
@@ -275,9 +285,17 @@ export function buildVariables(
  * Paste these (as {{variable}}) into each template body.
  */
 export const TEMPLATE_VARIABLES = {
-  identity: ['reference', 'submission_type', 'submitted_at', 'year'],
+  identity: ['reference', 'submission_type', 'submission_label', 'submitted_at', 'year'],
   merchant: ['customer_name', 'customer_email', 'customer_whatsapp', 'store_url', 'business_category', 'objective'],
-  commercial: ['service', 'package_name', 'service_fee', 'advertising_budget', 'total_payment', 'ad_budget_line'],
+  commercial: [
+    'service',
+    'package_name',
+    'service_fee',
+    'advertising_budget',
+    'total_payment',
+    'payment_note',
+    'ad_budget_line',
+  ],
   freeText: ['requirements', 'additional_info'],
   report: ['has_report', 'readiness_score', 'current_stage', 'report_summary'],
   brand: ['brand_name', 'brand_email', 'brand_whatsapp', 'support_hours', 'admin_email', 'to_email', 'to_name', 'reply_to'],
@@ -302,15 +320,38 @@ export const emailjsTransport: EmailTransport = async (config, templateId, varia
 };
 
 /**
- * Fires both templates. Runs them in parallel: a failure on one must not
- * prevent the other from going out (the merchant's confirmation failing
- * should not stop the team from hearing about the application).
+ * EmailJS allows **1 request per second** per account. Both templates used to
+ * fire in the same tick via Promise.allSettled, so the second call was
+ * routinely rate-limited and surfaced as a delivery failure — which is what
+ * the merchant saw as "the form is broken".
+ *
+ * Sending them one after the other, with a gap, costs about a second on a
+ * screen the user is already waiting on, and it is the only way both emails
+ * actually leave. The gap is injected so tests stay instant.
+ */
+const SEND_GAP_MS = 1100;
+
+export type SendOptions = {
+  /** Milliseconds between the two sends. EmailJS rate-limits at 1/second. */
+  gapMs?: number;
+  /** Injected in tests so the suite does not wait on real time. */
+  sleep?: (ms: number) => Promise<void>;
+};
+
+const defaultSleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+/**
+ * Fires both templates, sequentially, because of the rate limit above.
+ * Order matters: the team notification goes first. If the second send fails
+ * we still have the application, and the failure is reported honestly rather
+ * than swallowed.
  */
 export async function sendApplicationEmails(
   app: Application,
   report?: ReadinessReport,
   config: EmailConfig = EMAIL_CONFIG,
   transport: EmailTransport = emailjsTransport,
+  options: SendOptions = {},
 ): Promise<DeliveryState> {
   if (!isEmailConfigured(config)) {
     return { ...EMPTY_DELIVERY, skipped: ['admin', 'user'] };
@@ -318,24 +359,25 @@ export async function sendApplicationEmails(
 
   ensureInit(config);
   const variables = buildVariables(app, report);
-
-  const [admin, user] = await Promise.allSettled([
-    transport(config, config.adminTemplateId, variables),
-    transport(config, config.userTemplateId, variables),
-  ]);
+  const gap = options.gapMs ?? SEND_GAP_MS;
+  const sleep = options.sleep ?? defaultSleep;
 
   const state: DeliveryState = { skipped: [], sent: [], failed: [], complete: false };
-  const collect = (channel: DeliveryChannel) => (result: PromiseSettledResult<void>) => {
-    if (result.status === 'fulfilled') {
+  const attempt = async (channel: DeliveryChannel, templateId: string) => {
+    try {
+      await transport(config, templateId, variables);
       state.sent.push(channel);
-    } else {
-      const reason =
-        result.reason instanceof Error ? result.reason.message : String(result.reason ?? 'Unknown error');
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : String(err ?? 'Unknown error');
       state.failed.push({ channel, reason });
     }
   };
-  collect('admin')(admin);
-  collect('user')(user);
+
+  await attempt('admin', config.adminTemplateId);
+  // Respect the documented rate limit before the second call.
+  if (gap > 0) await sleep(gap);
+  await attempt('user', config.userTemplateId);
+
   state.complete = state.sent.length === 2;
   return state;
 }

@@ -7,7 +7,6 @@ import './styles/ui.css';
 import './styles/nav.css';
 import './styles/hero.css';
 import './styles/sections.css';
-import './styles/howitworks.css';
 import './styles/modal.css';
 import './styles/packages.css';
 import './styles/admin.css';

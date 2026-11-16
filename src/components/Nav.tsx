@@ -4,11 +4,15 @@ import { useScrolled } from '../hooks';
 import { SITE } from '../config';
 import { useDialog } from '../hooks';
 
+/**
+ * Three anchors, not five. Everything that used to be its own section now
+ * lives inside #explore as a tab, so the nav can point at the choice rather
+ * than at each chapter of it.
+ */
 const LINKS = [
-  { label: 'How It Works', href: '#how-it-works' },
-  { label: 'Readiness Stages', href: '#stages' },
-  { label: 'Services', href: '#services' },
-  { label: 'About', href: '#about' },
+  { label: 'Start here', href: '#introduction' },
+  { label: 'What we do', href: '#explore' },
+  { label: 'Get started', href: '#contact' },
 ];
 
 function BrandMark() {
@@ -53,8 +57,8 @@ export function Nav() {
           </nav>
 
           <div className="nav__actions">
-            <a className="btn btn--glass btn--sm" href="#services">
-              Explore Services
+            <a className="btn btn--glass btn--sm" href="#explore">
+              Explore
             </a>
             <button
               className="btn btn--primary btn--sm"
@@ -125,7 +129,7 @@ function Drawer({ onClose }: { onClose: () => void }) {
             Assess My Store
             <ArrowRight size={17} className="arrow" />
           </button>
-          <a className="btn btn--glass btn--block" href="#services" onClick={onClose}>
+          <a className="btn btn--glass btn--block" href="#explore" onClick={onClose}>
             Explore Services
             <ArrowUpRight size={16} />
           </a>

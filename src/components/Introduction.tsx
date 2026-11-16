@@ -1,6 +1,11 @@
-import { ArrowRight, ArrowUpRight, Compass, Gauge, Layers, ShieldCheck } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Gauge, Layers } from 'lucide-react';
 import { useApp } from '../store';
 
+/**
+ * The fork: assess, or buy directly. Two cards, one sentence each.
+ * The long-form justification (why readiness matters, stage by stage) now
+ * lives in the Explore tabs, so a visitor meets the choice before the theory.
+ */
 export function Introduction() {
   const { openModal } = useApp();
 
@@ -9,72 +14,37 @@ export function Introduction() {
       <div className="shell">
         <div className="intro__head">
           <div className="reveal">
-            <span className="eyebrow">The readiness principle</span>
+            <span className="eyebrow">Start here</span>
             <h2 className="h2 intro__title">
-              Not Every Store Is<br />
-              <span className="intro__title-em">Ready for Marketing.</span>
+              Not every store is
+              <br />
+              <span className="intro__title-em">ready for marketing.</span>
             </h2>
           </div>
-          <div className="intro__copy reveal" data-delay="1">
-            <p className="lede">
-              A beautiful storefront doesn't automatically translate into sales.
-            </p>
-            <p className="intro__body">
-              Before investing in customer acquisition, your Shopify store needs the
-              right technical foundation, a convincing brand experience, organic
-              discoverability and a functioning purchasing journey.
-            </p>
-            <p className="intro__body">
-              Our readiness framework helps you understand exactly where your store
-              stands and what needs to happen next.
-            </p>
-            <div className="intro__facts">
-              <div>
-                <strong>05</strong>
-                <span>Readiness stages</span>
-              </div>
-              <div>
-                <strong>15</strong>
-                <span>Fixed packages</span>
-              </div>
-              <div>
-                <strong>01</strong>
-                <span>Clear path forward</span>
-              </div>
-            </div>
-          </div>
+          <p className="lede intro__lede reveal" data-delay="1">
+            Advertising cannot fix a store that cannot convert. Pick the path that
+            matches what you already know.
+          </p>
         </div>
 
         <div className="paths">
           <article className="path-card path-card--assess reveal" data-delay="1">
-            <div className="path-card__glow" aria-hidden="true" />
             <div className="path-card__top">
               <span className="path-card__icon">
                 <Gauge size={20} />
               </span>
-              <span className="chip chip--dark">Path A</span>
+              <span className="chip chip--dark">Recommended</span>
             </div>
-            <h3 className="h3 path-card__title">Assess My Store</h3>
+            <h3 className="h3 path-card__title">Assess my store</h3>
             <p className="path-card__text">
-              Submit your store URL and get a scored readiness report — current stage,
-              critical issues and the recommended next step.
+              Tell us your store URL. You get a readiness score, your current stage
+              and the next step worth paying for.
             </p>
-            <ul className="path-card__list">
-              <li>
-                <ShieldCheck size={15} /> Overall readiness score, 0–100%
-              </li>
-              <li>
-                <Layers size={15} /> Stage-by-stage breakdown
-              </li>
-              <li>
-                <Compass size={15} /> Recommended package and cost
-              </li>
-            </ul>
             <button
               className="btn btn--primary btn--block"
               onClick={() => openModal({ kind: 'assessment' })}
             >
-              Start Assessment
+              Start assessment
               <ArrowRight size={16} className="arrow" />
             </button>
           </article>
@@ -84,31 +54,17 @@ export function Introduction() {
               <span className="path-card__icon path-card__icon--light">
                 <Layers size={20} />
               </span>
-              <span className="chip">Path B</span>
+              <span className="chip">Skip ahead</span>
             </div>
-            <h3 className="h3 path-card__title">I Know What I Need</h3>
-            <p className="path-card__text path-card__text--dark">
-              Skip the assessment and go straight to the catalogue. Fixed-price packages
-              across setup, branding, discovery, validation and Genius Marketing.
+            <h3 className="h3 path-card__title">I know what I need</h3>
+            <p className="path-card__text">
+              Go straight to the catalogue. Five services, three fixed-price
+              packages each, everything published.
             </p>
-            <ul className="path-card__list path-card__list--dark">
-              <li>
-                <ShieldCheck size={15} /> Three fixed packages per service
-              </li>
-              <li>
-                <Layers size={15} /> Clear deliverables and exclusions
-              </li>
-              <li>
-                <Compass size={15} /> Matched with a specialist after applying
-              </li>
-            </ul>
-            <a className="btn btn--outline btn--block" href="#services">
-              Explore Services
+            <a className="btn btn--outline btn--block" href="#explore">
+              See services
               <ArrowUpRight size={16} />
             </a>
-            <p className="path-card__note">
-              The assessment recommends — it never restricts what you can buy.
-            </p>
           </article>
         </div>
       </div>

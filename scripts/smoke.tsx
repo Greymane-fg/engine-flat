@@ -79,18 +79,46 @@ try {
 
   // 1. Landing content
   assert(/Build Your Store/.test(text()), 'hero headline rendered');
-  assert(/Not Every Store Is/.test(text()), 'introduction heading rendered');
-  assert(/Five Stages/.test(text()), 'stage section rendered');
-  assert(/Getting Your Store Ready/.test(text()), 'how it works rendered');
-  assert(/Find Exactly What/.test(text()), 'services rendered');
-  assert(/More Than/.test(text()), 'genius section rendered');
-  assert(/Your Next Stage/.test(text()), 'final cta rendered');
-  assert(document.querySelectorAll('.stage-card').length === 5, '5 stage cards');
-  assert(document.querySelectorAll('.svc-row').length === 5, '5 service rows');
+  assert(/ready for marketing/i.test(text()), 'introduction heading rendered');
+  assert(/Everything, one layer at a time/i.test(text()), 'explore compartment rendered');
+  assert(/starts here/i.test(text()), 'final cta rendered');
   assert(document.querySelectorAll('.pkg-grid').length === 0, 'no package modal open initially');
 
+  // The page is deliberately three blocks: promise, choice, detail.
+  const sections = document.querySelectorAll('main > section');
+  assert(sections.length === 4, `landing is four sections, not nine (found ${sections.length})`);
+
+  // The old standalone sections are gone; their content lives in tabs.
+  assert(document.querySelector('.stage-card') === null, 'stacked stage cards retired');
+  assert(document.querySelector('.svc-row') === null, 'stacked service rows retired');
+  assert(document.querySelector('.hiw') === null, 'how-it-works section retired');
+
+  // Exactly one tab panel is visible at a time.
+  const tabs = document.querySelectorAll('.explore__tab');
+  assert(tabs.length === 4, 'four explore tabs');
+  const visiblePanels = () =>
+    Array.from(document.querySelectorAll('.explore__panel')).filter((p) => !(p as HTMLElement).hidden);
+  assert(visiblePanels().length === 1, 'only one panel visible');
+  assert(/Structural Foundation/.test((visiblePanels()[0] as HTMLElement).textContent ?? ''), 'stages panel is the default');
+  assert(document.querySelectorAll('.stages-mini__row').length === 5, 'five stages listed inside the tab');
+
+  // Switching tabs swaps the panel without touching the URL.
+  await click(byText('.explore__tab', /Services & pricing/));
+  assert(visiblePanels().length === 1, 'still exactly one panel after switching');
+  assert(/Structural Foundation/.test((visiblePanels()[0] as HTMLElement).textContent ?? ''), 'services panel now shown');
+  assert(document.querySelectorAll('.svc-mini__row').length === 5, 'five services inside the tab');
+
+  await click(byText('.explore__tab', /How it works/));
+  assert(document.querySelectorAll('.steps-mini__row').length === 5, 'five process steps inside the tab');
+
+  await click(byText('.explore__tab', /^About/));
+  assert(/readiness-first/.test((visiblePanels()[0] as HTMLElement).textContent ?? ''), 'about panel shown');
+
+  // Back to services for the flow tests below.
+  await click(byText('.explore__tab', /Services & pricing/));
+
   // 2. Open service modal → packages visible
-  await click(byText('.svc-row button', /View Packages/));
+  await click(byText('.svc-mini__row button', /Packages/) );
   assert(/Structural Foundation/.test(text()), 'service modal opened');
   assert(document.querySelectorAll('.pkg').length === 3, 'three package cards');
   assert(/\$300/.test(text()) && /\$500/.test(text()), 'package prices shown');
@@ -100,7 +128,7 @@ try {
   await click(document.querySelector('.modal__close'));
   assert(document.querySelectorAll('.pkg').length === 0, 'modal closed');
 
-  const ovRow = Array.from(document.querySelectorAll('.svc-row')).find((r) => /Operational Validation/.test(r.textContent ?? ''))!;
+  const ovRow = Array.from(document.querySelectorAll('.svc-mini__row')).find((r) => /Operational Validation/.test(r.textContent ?? ''))!;
   await click(ovRow.querySelector('button'));
   assert(/Advertising budget is separate/.test(text()), 'ad budget disclaimer on OV');
   const standardPkg = Array.from(document.querySelectorAll('.pkg')).find(p => /Standard/.test(p.textContent ?? ''))!;
@@ -126,8 +154,8 @@ try {
   const consent = document.querySelector('.assess-consent input') as HTMLInputElement;
   await act(async () => { consent.click(); });
   await click(byText('.summary-card button', /Submit Application/));
-  // The submit handler now awaits both EmailJS sends before advancing.
-  await act(async () => { await new Promise((r) => setTimeout(r, 1200)); });
+  // Two sends, sequentially, with the 1.1s rate-limit gap between them.
+  await act(async () => { await new Promise((r) => setTimeout(r, 2600)); });
   const successText = text();
   assert(/Your Request Has Been Received|Almost there/.test(successText), 'success screen shown');
   assert(
@@ -140,7 +168,7 @@ try {
 
   // 5b. Unpriced package must never show a $0 total
   await click(document.querySelector('.modal__close')!);
-  const sfRow = Array.from(document.querySelectorAll('.svc-row')).find((r) =>
+  const sfRow = Array.from(document.querySelectorAll('.svc-mini__row')).find((r) =>
     /Structural Foundation/.test(r.textContent ?? ''),
   ) as HTMLElement;
   await click(sfRow.querySelector('button'));
@@ -226,7 +254,8 @@ try {
       .dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true }));
   });
   assert(/Assessing your store/.test(text()), 'scanning state shown');
-  await act(async () => { await new Promise((r) => setTimeout(r, 4200)); });
+  // Scan takes ~3.2s, then two sequential sends with the rate-limit gap.
+  await act(async () => { await new Promise((r) => setTimeout(r, 7000)); });
   assert(/Your Readiness Report/.test(text()), 'report generated after scan');
   assert(/Current readiness stage/.test(text()), 'current stage in report');
   assert(/Recommended next step/.test(text()), 'recommendation present');
@@ -259,37 +288,39 @@ try {
     priceInput.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
   }
   await click(document.querySelector('.modal__close')!);
-  const priceText = (document.querySelector('.services__list')?.textContent ?? '').replace(/\s+/g,' ');
+  // The catalogue now lives in the services tab of the Explore section.
+  const priceText = (document.querySelector('.svc-mini')?.textContent ?? '').replace(/\s+/g, ' ');
   assert(/\$450/.test(priceText), 'admin price change propagates to catalogue');
 
   // 9. Track application flow
   await click(byText('.footer__legal-links button', /Team access/));
   await click(document.querySelector('.modal__close')!);
   await act(async () => {
-    const btn = byText('.footer__col button', /Track Application/);
+    const btn = byText('.footer__col button', /Track application/i);
     btn?.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true }));
   });
   assert(/Track Your Application/.test(text()), 'tracking modal opens');
   assert(/Awaiting Review|Submitted|In Progress/.test(text()), 'pipeline renders');
 
-  // 10. Genius marketing entry + advertising-separate disclosure
+  // 10. Genius marketing entry, reached from the services tab
   await click(document.querySelector('.modal__close')!);
-  await act(async () => {
-    (document.querySelector('.genius__actions button') as any).dispatchEvent(
-      new dom.window.MouseEvent('click', { bubbles: true }),
-    );
-  });
+  const geniusRow = Array.from(document.querySelectorAll('.svc-mini__row')).find((r) =>
+    /Genius/.test(r.textContent ?? ''),
+  ) as HTMLElement;
+  await click(geniusRow.querySelector('button')!);
   assert(/Comprehensive Growth Partnership/.test(text()), 'genius packages open');
   assert(/Advertising expenditure is separate/.test(text()), 'genius ad-spend disclaimer');
   assert(/\$25,000/.test(text()), 'premium genius price shown');
   await click(document.querySelector('.modal__close')!);
 
-  // 11. Stage card opens the right service
-  const stage3 = document.querySelectorAll('.stage-card')[2] as HTMLElement;
+  // 11. A stage row opens the right service
+  await click(byText('.explore__tab', /The five stages/));
+  const stage3 = document.querySelectorAll('.stages-mini__row')[2] as HTMLElement;
   await click(stage3.querySelector('button')!);
-  assert(/Organic Discoverability/.test(text()), 'stage card links to its service');
+  assert(/Organic Discoverability/.test(text()), 'stage row links to its service');
   assert(document.querySelectorAll('.pkg').length === 3, 'stage service has 3 packages');
   await click(document.querySelector('.modal__close')!);
+  await click(byText('.explore__tab', /Services & pricing/));
 
   // 12. Mobile drawer
   await click(document.querySelector('.nav__burger')!);
