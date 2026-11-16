@@ -47,7 +47,12 @@ export type Application = {
   packageTier?: PackageTier;
   serviceFee: number | null;
   adBudget?: number;
-  total: number;
+  /**
+   * Total expected payment, or `null` when the selected package has no fixed
+   * price yet ("to be confirmed"). Never coerce an unknown price to zero — a
+   * silent $0 total misrepresents what the merchant will be asked to pay.
+   */
+  total: number | null;
   status: (typeof APPLICATION_STAGES)[number];
   contact: ApplicationContact;
   reportId?: string;

@@ -138,8 +138,71 @@ try {
   assert(/ENG-\d{4}-0001/.test(text()), 'reference is sequential (first of the year)');
   assert(/2,500/.test(text()), 'submitted total retained');
 
+  // 5b. Unpriced package must never show a $0 total
+  await click(document.querySelector('.modal__close')!);
+  const sfRow = Array.from(document.querySelectorAll('.svc-row')).find((r) =>
+    /Structural Foundation/.test(r.textContent ?? ''),
+  ) as HTMLElement;
+  await click(sfRow.querySelector('button'));
+  const premiumCard = Array.from(document.querySelectorAll('.pkg')).find((p) =>
+    /Premium/.test(p.textContent ?? ''),
+  ) as HTMLElement;
+  await click(premiumCard.querySelector('button'));
+  const quoteText = text();
+  assert(/Quoted after review/.test(quoteText), 'unpriced package asks for a quote');
+  assert(!/Total expected payment\s*\$0(?!\d)/.test(quoteText), 'unpriced package never totals $0');
+  assert(/priced after discovery/i.test(quoteText), 'explains when the price arrives');
+  await click(document.querySelector('.modal__close')!);
+
+  // 5c. Exclusions are collapsed but still reachable
+  await click(sfRow.querySelector('button'));
+  const det = document.querySelector('.pkg__details') as HTMLDetailsElement;
+  assert(det !== null && !det.open, 'exclusions collapsed by default');
+  assert(det.querySelectorAll('li').length > 0, 'exclusion content still in the DOM for a11y/SEO');
+  await click(det.querySelector('summary'));
+  assert(det.open, 'exclusions expand on click');
+  await click(document.querySelector('.modal__close')!);
+
+  // 5d. Mobile plan switcher: all tiers reachable from one bar
+  await click(sfRow.querySelector('button'));
+  const switchTabs = document.querySelectorAll('.pkg-switch button');
+  assert(switchTabs.length === 3, 'tier switcher exposes all three plans');
+  const switchText = switchTabs[0].textContent ?? '';
+  assert(/Basic/i.test(switchText) && /\$300/.test(switchText), 'switcher tab shows tier and price');
+  const cells = () => document.querySelectorAll('.pkg-cell');
+  assert(cells().length === 3, 'all three cards stay in the DOM');
+  const activeTab = Array.from(switchTabs).find((t) => t.getAttribute('aria-pressed') === 'true');
+  assert(
+    Array.from(switchTabs).filter((t) => t.getAttribute('aria-pressed') === 'true').length === 1,
+    'exactly one tier presented as current',
+  );
+  assert(
+    /Standard/i.test(activeTab!.textContent ?? ''),
+    'opens on the recommended tier rather than always the cheapest',
+  );
+  await click(switchTabs[2]);
+  assert(cells()[2].classList.contains('is-active'), 'switching tier activates its card');
+  assert(!cells()[0].classList.contains('is-active'), 'previous tier card stands down');
+  // The chosen card's CTA must still open the application for that exact tier.
+  const activeCard = cells()[2].querySelector('.pkg') as HTMLElement;
+  assert(/Premium/.test(activeCard.textContent ?? ''), 'active card is the premium tier');
+  await click(activeCard.querySelector('.pkg__cta'));
+  assert(/Apply for Premium/.test(text()), 'switcher CTA applies the shown tier');
+  await click(document.querySelector('.modal__close')!);
+  await click(document.querySelector('.modal__close') ?? document.body);
+  assert(document.querySelectorAll('.pkg').length === 0, 'modal fully closed after switcher test');
+
+  // 5e. Scope disclosure replaces the header wall on narrow screens
+  await click(sfRow.querySelector('button'));
+  const scope = document.querySelector('.svc-modal__scope') as HTMLDetailsElement;
+  assert(scope !== null, 'service header has a collapsible scope list');
+  assert(!scope.open, 'scope list is collapsed by default');
+  assert(scope.querySelectorAll('li').length === 5, 'scope entries retained in the DOM');
+  await click(scope.querySelector('summary'));
+  assert(scope.open, 'scope list expands on click');
+  await click(document.querySelector('.modal__close')!);
+
   // 6. Policy modal
-  await click(document.querySelector('.modal__close'));
   const legalBtn = byText('.footer__legal-links button', /Privacy Policy/);
   await click(legalBtn);
   assert(/Information we collect/.test(text()), 'privacy policy modal opens');

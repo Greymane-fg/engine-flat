@@ -39,9 +39,68 @@
   color: var(--lavender);
 }
 
+/* Scope disclosure: hidden on desktop (the aside list is already there). */
+.svc-modal__scope {
+  display: none;
+}
+
 @media (max-width: 860px) {
   .svc-modal__head {
     grid-template-columns: 1fr;
+  }
+
+  .svc-modal__areas--aside {
+    display: none;
+  }
+
+  /* The summary stays: it is orientation, not filler. What went is the
+     five-row padded scope list, which now sits behind the disclosure. */
+
+  .svc-modal__head {
+    margin-top: 14px;
+  }
+
+  .svc-modal__scope {
+    display: block;
+    margin-top: 14px;
+  }
+
+  .svc-modal__scope summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    list-style: none;
+    padding: 6px 12px 6px 13px;
+    border-radius: var(--r-pill);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.045);
+    font-size: 11.5px;
+    font-weight: 500;
+    color: rgba(247, 244, 251, 0.62);
+    transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  }
+
+  .svc-modal__scope summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .svc-modal__scope summary:hover {
+    color: var(--on-dark);
+    border-color: rgba(185, 165, 237, 0.34);
+  }
+
+  .svc-modal__scope summary svg {
+    color: var(--lavender);
+    transition: transform var(--dur) var(--ease);
+  }
+
+  .svc-modal__scope[open] summary svg {
+    transform: rotate(180deg);
+  }
+
+  .svc-modal__scope .svc-modal__areas {
+    margin-top: 12px;
   }
 }
 
@@ -57,6 +116,104 @@
 @media (max-width: 980px) {
   .pkg-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* --- Tier switcher -------------------------------------------------------
+   Below 980px the three cards would stack into three screen-heights of
+   scrolling with the chosen plan buried at the bottom. Instead the tiers
+   become a switcher and only the active card renders. Above 980px the tabs
+   are hidden and all three cards show side by side for comparison.
+   ------------------------------------------------------------------------ */
+
+.pkg-switch {
+  display: none;
+}
+
+.pkg-cell {
+  display: contents;
+}
+
+@media (max-width: 980px) {
+  .pkg-switch {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    padding: 5px;
+    margin-bottom: 16px;
+    border-radius: var(--r-md);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .pkg-switch__tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 9px 6px;
+    border-radius: calc(var(--r-md) - 4px);
+    border: 1px solid transparent;
+    color: rgba(247, 244, 251, 0.5);
+    text-align: center;
+    transition: background var(--dur) var(--ease), color var(--dur) var(--ease),
+      border-color var(--dur) var(--ease);
+  }
+
+  .pkg-switch__tab.is-active {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(255, 255, 255, 0.14);
+    color: var(--on-dark);
+  }
+
+  .pkg-switch__tier {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+  }
+
+  .pkg-switch__price {
+    font-family: var(--font-display);
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--lavender);
+  }
+
+  .pkg-switch__tab.is-active .pkg-switch__price {
+    color: var(--chartreuse);
+  }
+
+  .pkg-cell {
+    display: none;
+  }
+
+  .pkg-cell.is-active {
+    display: block;
+    animation: pkgIn 260ms var(--ease);
+  }
+
+  .pkg {
+    gap: 16px;
+    padding: 20px 18px;
+  }
+}
+
+@keyframes pkgIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pkg-cell.is-active {
+    animation: none;
   }
 }
 
@@ -248,6 +405,57 @@
   border-top: 1px solid rgba(255, 255, 255, 0.07);
 }
 
+/* Collapsed exclusions: one quiet line until the reader asks for detail. */
+.pkg__details summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: rgba(247, 244, 251, 0.42);
+  transition: color var(--dur) var(--ease);
+}
+
+.pkg__details summary::-webkit-details-marker {
+  display: none;
+}
+
+.pkg__details summary:hover {
+  color: rgba(247, 244, 251, 0.7);
+}
+
+.pkg__details summary span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.pkg__details summary em {
+  font-style: normal;
+  font-size: 10.5px;
+  color: rgba(247, 244, 251, 0.28);
+}
+
+.pkg__details summary svg {
+  flex: 0 0 auto;
+  transition: transform var(--dur) var(--ease);
+}
+
+.pkg__details[open] summary svg {
+  transform: rotate(180deg);
+}
+
+.pkg__details[open] summary {
+  color: rgba(247, 244, 251, 0.6);
+}
+
+.pkg__details .pkg__list {
+  margin-top: 10px;
+}
+
 .pkg__cta {
   margin-top: auto;
 }
@@ -298,9 +506,17 @@
   min-width: 0;
 }
 
+@media (min-width: 901px) {
+  .summary-card {
+    position: sticky;
+    top: 0;
+  }
+}
+
+/* Sticky only where the summary sits beside the form. Once the layout stacks
+   (below 900px) and the dialog scrolls as one column, a sticky card would park
+   itself over the fields the merchant is trying to fill in. */
 .summary-card {
-  position: sticky;
-  top: 0;
   padding: 22px;
   border-radius: var(--r-lg);
   background: rgba(255, 255, 255, 0.05);

@@ -28,14 +28,9 @@ export function Genius() {
             <span className="genius__em">Generic Marketing.</span>
           </h2>
           <p className="lede reveal" data-delay="2">
-            Generic marketing can help establish whether your products have market
-            potential. But sustainable growth requires more than running advertisements
-            and hoping for results.
-          </p>
-          <p className="genius__body reveal" data-delay="2">
-            Genius Marketing is our expert-led approach to understanding your business,
-            identifying opportunities, developing customized strategies and building
-            campaigns designed around your actual growth objectives.
+            Generic marketing can test whether your products have potential. Sustainable
+            growth needs more than running ads and hoping — it needs a strategy built
+            around your actual business.
           </p>
 
           <div className="genius__actions reveal" data-delay="3">

@@ -188,14 +188,15 @@ export function TrackModal({ onClose }: { onClose: () => void }) {
                   </div>
                   <div>
                     <dt>Value</dt>
-                    <dd>{money(app.total)}</dd>
+                    <dd>{app.total === null ? 'Awaiting quote' : money(app.total)}</dd>
                   </div>
                   {typeof app.adBudget === 'number' && app.adBudget > 0 && (
                     <div>
                       <dt>Advertising budget</dt>
                       <dd>
-                        {money(app.adBudget)} of {money(app.total)} is allocated to
-                        advertising
+                        {app.total === null
+                          ? `${money(app.adBudget)} allocated to advertising, separate from the service fee`
+                          : `${money(app.adBudget)} of ${money(app.total)} is allocated to advertising`}
                       </dd>
                     </div>
                   )}

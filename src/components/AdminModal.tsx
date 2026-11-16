@@ -175,10 +175,13 @@ function ApplicationsTab({
   const stats = useMemo(() => {
     const assessments = applications.filter((a) => a.type === 'assessment').length;
     const sold = applications.filter((a) => a.type === 'service');
-    const pipeline = sold.reduce((n, a) => n + a.total, 0);
+    // Applications awaiting a quote have no total; counting them as zero would
+    // understate pipeline value silently.
+    const pipeline = sold.reduce((n, a) => n + (a.total ?? 0), 0);
+    const awaitingQuote = sold.filter((a) => a.total === null).length;
     const adBudget = sold.reduce((n, a) => n + (a.adBudget ?? 0), 0);
     const active = applications.filter((a) => a.status !== 'Completed').length;
-    return { assessments, sold: sold.length, pipeline, adBudget, active };
+    return { assessments, sold: sold.length, pipeline, adBudget, active, awaitingQuote };
   }, [applications]);
 
   if (applications.length === 0) {
@@ -204,7 +207,14 @@ function ApplicationsTab({
         </div>
         <div className="admin-stat">
           <strong>{money(stats.pipeline)}</strong>
-          <span>Pipeline value</span>
+          <span>
+            Pipeline value
+            {stats.awaitingQuote > 0 && (
+              <em style={{ display: 'block', fontStyle: 'normal', textTransform: 'none', letterSpacing: 0 }}>
+                + {stats.awaitingQuote} awaiting quote
+              </em>
+            )}
+          </span>
         </div>
         <div className="admin-stat">
           <strong>{money(stats.adBudget)}</strong>
@@ -265,7 +275,7 @@ function ApplicationsTab({
                     <div>
                       <dt>Total</dt>
                       <dd>
-                        <strong>{money(a.total)}</strong>
+                        <strong>{a.total === null ? 'Quoted after review' : money(a.total)}</strong>
                       </dd>
                     </div>
                     <div>

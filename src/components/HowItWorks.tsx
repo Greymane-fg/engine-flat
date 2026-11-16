@@ -4,27 +4,27 @@ const STEPS = [
   {
     n: '01',
     title: 'Choose Your Path',
-    body: 'Submit your store for an assessment or select a service directly. Neither route is locked — the assessment recommends, it does not restrict.',
+    body: 'Submit your store for an assessment, or pick a service directly.',
   },
   {
     n: '02',
     title: 'Understand Your Requirements',
-    body: "Identify your store's current readiness level and the specific improvements required to reach the next stage.",
+    body: 'See your readiness level and exactly what is needed to progress.',
   },
   {
     n: '03',
     title: 'Select Your Package',
-    body: 'Choose the service and package that best addresses your needs. Every package has fixed pricing and defined deliverables.',
+    body: 'Pick the package that fits. Fixed pricing, defined deliverables.',
   },
   {
     n: '04',
     title: 'Get Matched With an Expert',
-    body: 'Your application is forwarded to an appropriate specialist, who reviews your store and confirms the scope with you.',
+    body: 'A specialist reviews your store and confirms the scope with you.',
   },
   {
     n: '05',
     title: 'Move Closer to Growth',
-    body: 'Complete the required improvements and progress towards validated operations and strategic marketing.',
+    body: 'Complete the work and move toward validated operations and marketing.',
   },
 ];
 
@@ -40,8 +40,7 @@ export function HowItWorks() {
             Getting Your Store Ready<br className="hide-sm" /> Is Simple.
           </h2>
           <p className="lede hiw__lede">
-            Five steps from uncertainty to a clear, expert-backed plan. No obligations
-            until you approve a package.
+            Five steps to a clear plan. No obligation until you approve a package.
           </p>
         </div>
 
